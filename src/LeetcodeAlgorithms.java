@@ -2265,10 +2265,28 @@ class leetcode{
         return res;
     }
 
-    //利用HashTable
+    //Use HashMap, traverse the first two arrays and sum up, put the results in the map
+    //Traverse the remained two arrays and use get function(O(1)) in hashmap to find.
     public int fourSumCount(int[] nums1, int[] nums2, int[] nums3, int[] nums4) {
+        Map<Integer,Integer> map = new HashMap<>();
+        int res = 0;
+        for(int num1 : nums1){
+            for(int num2 : nums2){
+                int tmp = num1 + num2;
+                map.put(tmp,map.getOrDefault(tmp,0) + 1);
+            }
+        }
 
-        return 1;
+        for(int num3 : nums3){
+            for(int num4 : nums4){
+                int tmp = num3 + num4;
+                if(map.containsKey(-tmp)){
+                    res += map.get(-tmp);
+                }
+            }
+        }
+
+        return res;
     }
 }
 
