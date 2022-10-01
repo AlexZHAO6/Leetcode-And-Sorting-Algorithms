@@ -2288,6 +2288,88 @@ class leetcode{
 
         return res;
     }
+
+    //one-dimensional DP
+    public int maxProfit(int[] prices) {
+        int len = prices.length;
+        if(len <= 1) return 0;
+
+        int[] dp = new int[len+1];
+        dp[0] = 0;
+        dp[1] = 0;
+
+        int max = Integer.MIN_VALUE;
+        for(int i = 2; i < len + 1; i++){
+            dp[i] = Math.max(0, dp[i-1] + (prices[i-1] - prices[i - 2]));
+            max = Math.max(max,dp[i]);
+        }
+
+        return max;
+    }
+
+    //two-dimensional DP
+    public int maxProfit_two(int[] prices) {
+        int len = prices.length;
+        int[][] dp = new int[len][2];
+
+        dp[0][0] = 0;
+        dp[0][1] = -prices[0];
+
+        for(int i = 1; i < len; i++){
+            dp[i][0] = Math.max(dp[i-1][0], dp[i-1][1] + prices[i]);
+            dp[i][1] = Math.max(dp[i-1][1], dp[i-1][0] - prices[i]);
+        }
+
+        return dp[len - 1][0];
+    }
+
+    //Store the character in the hashmap;
+    //judge odd or even.
+    public int longestPalindrome2(String s) {
+        Map<Character,Integer> map = new HashMap<>();
+        int len = s.length();
+        for(int i = 0; i < len; i++){
+            map.put(s.charAt(i),map.getOrDefault(s.charAt(i),0)+1);
+        }
+
+        int res = 0;
+        for(int i = 0; i < len; i++){
+            if(map.containsKey(s.charAt(i)) && map.get(s.charAt(i)) % 2 == 0){
+                res += map.get(s.charAt(i));
+                map.remove(s.charAt(i));
+            }
+            else if(map.containsKey(s.charAt(i)) && map.get(s.charAt(i)) > 1){
+                int tmp = map.get(s.charAt(i)) / 2;
+                res += tmp*2;
+
+                map.put(s.charAt(i),1);
+            }
+        }
+        if(!map.isEmpty()) res++;
+
+        return res;
+    }
+
+
+    //Store the prefix sum in the HashMap; Search for (prefix sum - k);
+    //(From 0 to length)gi
+    public int subarraySum(int[] nums, int k) {
+        int len = nums.length;
+        Map<Integer,Integer> map = new HashMap<>();
+        int pre = 0, res = 0;
+        map.put(0,1);
+
+        for(int i = 0; i < len; i++){
+            pre += nums[i];
+            if(map.containsKey(pre- k)){
+                res += map.get(pre-k);
+            }
+
+            map.put(pre,map.getOrDefault(pre,0)+1);
+        }
+
+        return res;
+    }
 }
 
 // Definition for a Node with random point.
