@@ -2370,6 +2370,178 @@ class leetcode{
 
         return res;
     }
+
+    //Sort first, and then merge.
+    public int[][] merge(int[][] intervals) {
+        int len = intervals.length;
+        if(len == 0) return new int[0][2];
+        List<int[]> res = new ArrayList<>();
+
+        Arrays.sort(intervals, new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                return o1[0] - o2[0];
+            }
+        });
+
+        for(int i = 0; i < len; i++){
+            int left = intervals[i][0];
+            int right = intervals[i][1];
+
+            if(res.size() == 0 || left > res.get(res.size() - 1)[1]){
+                res.add(new int[]{left,right});
+            }
+            else {
+                int tmp = Math.max(right,res.get(res.size() - 1)[1]);
+                res.get(res.size() - 1)[1] = tmp;
+
+            }
+
+        }
+
+        return res.toArray(new int[res.size()][]);
+    }
+
+
+    //Greedy method for evaluating the relative position between two nums.
+    //a+b > b+a, a  b; a+b < b+a b  a;
+    //证明：若得到结果非最大，则有数字的相对顺序需要调换，但这与排序逻辑相悖。所以结果必然是最大。
+    public String largestNumber(int[] nums) {
+        int len = nums.length;
+        String[] numsarr = new String[len];
+        for(int i = 0; i < len; i++){
+            numsarr[i] = ""+nums[i];
+        }
+
+        Arrays.sort(numsarr, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                String a = o1 + o2;
+                String b = o2 + o1;
+
+                return b.compareTo(a);
+            }
+        });
+
+        StringBuilder res = new StringBuilder();
+        for(String a : numsarr){
+            res.append(a);
+        }
+
+        int index = 0;
+        while(index < res.length() - 1 && res.charAt(index) == '0'){
+            index++;
+        }
+
+        return res.substring(index);
+    }
+
+    //Greedy method + sorting based on the first item.
+    public int findLongestChain(int[][] pairs) {
+        int len = pairs.length;
+        if(len <= 1) return len;
+
+        Arrays.sort(pairs, new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                return o1[0] - o2[0];
+            }
+        });
+
+        int max = 1;
+        int index = 0;
+        for(int i = 0; i < len - 1; i++){
+            if(pairs[index][1] < pairs[i+1][0]){
+                index = i + 1;
+                max++;
+            }
+            else {
+                int tmp_index = pairs[index][1] <= pairs[i+1][1] ? index : i + 1;
+                index = tmp_index;
+            }
+        }
+
+        return max;
+    }
+
+
+    //Greedy method + sorting based on the first item.
+    public int eraseOverlapIntervals(int[][] intervals) {
+        int len = intervals.length;
+        if(len <= 1) return 0;
+
+        Arrays.sort(intervals, new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                return o1[0] - o2[0];
+            }
+        });
+
+        int left = intervals[0][0];
+        int right = intervals[0][1];
+
+        int res = 0;
+        for(int i = 1; i < len; i++){
+            if(intervals[i][0] >= left && intervals[i][0] < right){
+                res++;
+                right = Math.min(right,intervals[i][1]);
+            }
+            else {
+                left = intervals[i][0];
+                right = intervals[i][1];
+            }
+        }
+
+        return res;
+    }
+
+    //Simulation!!Remember to skip the waiting time and just traverse the tasks.
+    public int leastInterval(char[] tasks, int n) {
+        int len = tasks.length;
+        if(len <= 1) return len;
+
+        Map<Character,Integer> freq_map = new HashMap<>();
+        for(int i = 0; i < len; i++){
+            freq_map.put(tasks[i],freq_map.getOrDefault(tasks[i],0) + 1);
+        }
+
+        int size = freq_map.size();
+
+        List<Integer> validTime = new ArrayList<>();
+        List<Integer> remain = new ArrayList<>();
+
+        for(char a : freq_map.keySet()){
+            validTime.add(1);
+            remain.add(freq_map.get(a));
+        }
+
+        int res = 0;
+        for(int i = 0; i < len; i++){
+            res++;
+            //skip the waiting time
+            int minNext = Integer.MAX_VALUE;
+            for(int j = 0; j < size; j++){
+                if(remain.get(j) != 0){
+                    minNext = Math.min(minNext,validTime.get(j));
+                }
+            }
+            res = Math.max(res,minNext);
+
+            int index = -1;
+            for(int j = 0; j < size; j++){
+                if(remain.get(j) != 0 && validTime.get(j) <= res){
+                    if(index == -1 || remain.get(j) > remain.get(index)){
+                        index = j;
+                    }
+                }
+            }
+
+            remain.set(index,remain.get(index) - 1);
+            validTime.set(index,res + n + 1);
+        }
+
+        return res;
+    }
 }
 
 // Definition for a Node with random point.

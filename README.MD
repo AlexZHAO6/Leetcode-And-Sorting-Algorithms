@@ -10,4 +10,4 @@ General Algorithms && Leetcode
 
 --- Leetcode
 
-    TODO:数组与贪心 621
+    TODO:数组与贪心 406
