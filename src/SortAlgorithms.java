@@ -3,10 +3,18 @@ import java.util.List;
 public class SortAlgorithms {
     public static void main(String[] args){
         System.out.println("test");
+        int[] test = {2,1,3};
+        SortAlgorithms_real testa = new SortAlgorithms_real();
+        testa.quickSortHelp(test);
+
+        for(int i = 0; i < test.length; i++){
+            System.out.println(test[i]);
+        }
+
     }
 }
 
-class sortAlgorithms{
+class SortAlgorithms_real{
     public void bubbleSort(int[] arrs){
         int len = arrs.length;
 
@@ -69,25 +77,25 @@ class sortAlgorithms{
         int left = start + 1;
         int right = end;
 
-        while(left < right){
-            while (left < right && arrs[left] <= pointer) left++;
+        while(true){
+            while(left <= right && arrs[left] <= pointer) left++;
+            while(left <= right && arrs[right] > pointer) right--;
 
-            if(left < right){
-                int tmp = arrs[right];
-                arrs[right] = arrs[left];
-                arrs[left] = tmp;
-                right--;
-            }
+            if(left >= right) break;
 
+            swap(arrs,left,right);
+            left++;
+            right--;
         }
 
-        if(left == right && arrs[right] > pointer) right--;
-
-        if(start != right){
-            arrs[start] = arrs[right];
-            arrs[right] = pointer;
-        }
+        swap(arrs,start,right);
         return right;
+    }
+
+    public void swap(int[] nums, int a, int b){
+        int tmp = nums[a];
+        nums[a] = nums[b];
+        nums[b] = tmp;
     }
 
 }

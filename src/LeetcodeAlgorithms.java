@@ -1,9 +1,10 @@
 import java.util.*;
 
 public class LeetcodeAlgorithms {
+
     public static void main(String[] args){
         int[] test_global = {1,5,3,2,7};
-        sortAlgorithms ah = new sortAlgorithms();
+        SortAlgorithms_real ah = new SortAlgorithms_real();
         leetcode testclass = new leetcode();
         int[] test2 = {4,3,2,7,8,2,3,1};
         List<Integer> reslut = testclass.findDisappearedNumbers(test2);
@@ -13,11 +14,15 @@ public class LeetcodeAlgorithms {
         String[] tmp = {"4","13","5","/","*"};
         testclass.evalRPN(tmp);
         testclass.decodeString("3[z]2[2[y]pq4[2[jk]e1[f]]]ef");
+        testclass.removeDuplicateLetters("bcabc");
         System.out.println(testclass.multiply(num1,num2));
     }
 }
 
 class leetcode{
+    private final static Random random = new Random();
+
+
     Map<Node,Node> cachemap = new HashMap<>();
     public int removeDuplicates(int[] nums) {
         int len = nums.length;
@@ -2542,6 +2547,474 @@ class leetcode{
 
         return res;
     }
+
+    //Two stacks, one for ( and one for *;
+    public boolean checkValidString(String s) {
+        int len = s.length();
+        Stack<Integer> left = new Stack<>();
+        Stack<Integer> symbol = new Stack<>();
+
+        for(int i = 0; i < len; i++){
+            if(s.charAt(i) == '(') left.push(i);
+            else if(s.charAt(i) == '*') symbol.push(i);
+            else {
+                if(!left.isEmpty()) left.pop();
+                else if(!symbol.isEmpty()) symbol.pop();
+                else return false;
+                }
+        }
+        while(!left.isEmpty() && !symbol.isEmpty()){
+            if(left.peek() < symbol.peek()){
+                left.pop();
+                symbol.pop();
+            }
+            else return false;
+        }
+
+        return left.isEmpty();
+    }
+
+    //move 0 to the front, and then move 1 to the front.
+    //use pointer to determine where to move.
+    public void sortColors(int[] nums) {
+        int left = 0;
+
+        for(int i = 0; i < nums.length; i++){
+            if(nums[i] == 0){
+                int tmp = nums[left];
+                nums[left] = nums[i];
+                nums[i] = tmp;
+                left++;
+            }
+        }
+
+        for(int i = 0; i < nums.length; i++){
+            if(nums[i] == 1 ){
+                int tmp = nums[left];
+                nums[left] = nums[i];
+                nums[i] = tmp;
+                left++;
+            }
+        }
+    }
+
+    //Quick Selection algorithm, based on quick sort.
+    public int findKthLargest(int[] nums, int k) {
+        int len = nums.length;
+        int left = 0;
+        int right = nums.length - 1;
+        while(true){
+            int par_num = partition(nums, left, right);
+            if(par_num == len - k) return nums[par_num];
+            else if(par_num < len - k){
+                left = par_num + 1;
+            }
+            else {
+                right = par_num - 1;
+            }
+        }
+    }
+
+    public int partition(int[] nums, int left, int right){
+        int random_num = left + random.nextInt(right - left + 1);
+        swap(nums,left,random_num);
+
+        int prviot = nums[left];
+        int front = left + 1;
+        int end = right;
+        while(true){
+            while(front <= end && nums[front] <= prviot) front++;
+            while(front <= end && nums[end] > prviot) end--;
+
+            if(front > end) break;
+
+            swap(nums, front, end);
+            front++;
+            end--;
+        }
+        swap(nums, left, end);
+
+        return end;
+    }
+    public void swap(int[] nums, int a, int b){
+        int tmp = nums[a];
+        nums[a] = nums[b];
+        nums[b] = tmp;
+    }
+
+
+    //one-dimensional DP
+    public int maxSubArray(int[] nums) {
+        int len = nums.length;
+        if(len == 1) return nums[0];
+        int[] dp = new int[len+1];
+        dp[0] = nums[0];
+
+        int res = dp[0];
+        for(int i = 1; i < len; i++){
+            dp[i] = Math.max(dp[i-1] + nums[i],nums[i]);
+            res = Math.max(res,dp[i]);
+        }
+
+        return res;
+    }
+
+    //我们首先检查第 00 个加油站，并试图判断能否环绕一周；如果不能，就从第一个无法到达的加油站开始继续检查。
+    public int canCompleteCircuit(int[] gas, int[] cost) {
+        int n = gas.length;
+        int i = 0;
+        while (i < n) {
+            int sumOfGas = 0, sumOfCost = 0;
+            int cnt = 0;
+            while (cnt < n) {
+                int j = (i + cnt) % n;
+                sumOfGas += gas[j];
+                sumOfCost += cost[j];
+                if (sumOfCost > sumOfGas) {
+                    break;
+                }
+                cnt++;
+            }
+            if (cnt == n) {
+                return i;
+            } else {
+                i = i + cnt + 1;
+            }
+        }
+        return -1;
+    }
+
+    //先找到升序和降序的边缘。
+    //遍历中间数组，更新边缘值(当中间数组有<左边缘 or >右边缘)
+    public int findUnsortedSubarray(int[] nums) {
+        int len = nums.length;
+        if(len <= 1) return 0;
+
+        int front = 0;
+        int end = len - 1;
+
+        while(front < end && nums[front] <= nums[front+1]) front++;
+        while(front < end && nums[end] >= nums[end-1]) end--;
+        int l = front, r = end;
+
+        int min = nums[l], max = nums[r];
+
+        for(int i = l; i <= r; i++){
+            if(nums[i] < min){
+                while(front >= 0 && nums[i] < nums[front]) front--;
+                min = front >= 0 ? nums[front] : Integer.MIN_VALUE;
+            }
+
+            if(nums[i] > max){
+                while(end < len && nums[i] > nums[end]) end++;
+                max = end < len ? nums[end] : Integer.MAX_VALUE;
+            }
+
+        }
+
+        return front == end ? 0 : (end-1) - (front+1) + 1;
+    }
+
+
+    //根据身高降序，身高相同第二个值升序。(让前面人多的尽量排在后面),排序后索引值就是前面比自己高的人的个数
+    //当 当前位置 == people[i][1], 直接插入。 否则插入到people[i][1]的位置。
+    public int[][] reconstructQueue(int[][] people) {
+        int len = people.length;
+        if(len <= 1) return people;
+
+        Arrays.sort(people, new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                if(!(o1[0] == o2[0])) return o2[0] - o1[0];
+                else return o1[1] - o2[1];
+            }
+        });
+
+        List<int[]> res = new ArrayList<>();
+
+        for(int i = 0; i < len; i++){
+            if(people[i][1] == i){
+                res.add(people[i]);
+            }
+            else {
+                res.add(people[i][1],people[i]);
+            }
+        }
+
+
+        return res.toArray(new int[len][]);
+    }
+
+    //two-dimensiontal DP
+    public int maxProduct(int[] nums) {
+        int len = nums.length;
+        if(len == 1) return nums[0];
+
+        int[][] dp = new int[len][2];
+        dp[0][0] = nums[0];
+        dp[0][1] = nums[0];
+        int max = dp[0][0];
+
+        for(int i = 1; i < len; i++){
+            if(nums[i] > 0){
+                dp[i][0] = Math.max(dp[i-1][0] * nums[i], nums[i]);
+                dp[i][1] = Math.min(dp[i-1][1] * nums[i], nums[i]);
+            }
+            else {
+                dp[i][0] = Math.max(dp[i-1][1] * nums[i], nums[i]);
+                dp[i][1] = Math.min(dp[i-1][0] * nums[i], nums[i]);
+            }
+
+            max = Math.max(dp[i][0],max);
+        }
+
+        return max;
+    }
+
+
+    //单调栈 + HashMap(从底到顶递减)
+    public int[] nextGreaterElement(int[] nums1, int[] nums2) {
+        int len = nums2.length;
+        Map<Integer,Integer> map = new HashMap<>();
+        Stack<Integer> stack = new Stack<>();
+
+        for(int i = len - 1; i >= 0; i--){
+            while(!stack.isEmpty() && stack.peek() <= nums2[i]) stack.pop();
+
+            map.put(nums2[i], stack.isEmpty() ? -1 : stack.peek());
+
+            stack.push(nums2[i]);
+        }
+
+        int[] res = new int[nums1.length];
+        for(int i = 0; i < nums1.length; i++){
+            res[i] = map.get(nums1[i]);
+        }
+
+        return res;
+    }
+
+
+    //维护单调递减的栈，栈内存index;
+    //While:当前元素 > 栈顶时，找到了nextGreater,弹出; Otherwise push into the stack;
+    //Traverse twice of the array because of the loop.
+    public int[] nextGreaterElements(int[] nums) {
+        int len = nums.length;
+        int[] res = new int[len];
+        Arrays.fill(res,-1);
+        Stack<Integer> stack = new Stack<>();
+
+        for(int i = 0; i < len * 2; i++){
+            while(!stack.isEmpty() && nums[i%len] > nums[stack.peek()]){
+                int tmp = stack.pop();
+                res[tmp] = nums[i%len];
+            }
+
+            stack.push(i % len);
+        }
+
+        return res;
+    }
+
+
+    //Math, always break the Integer into several 3, and then add 2 or 4;
+    public int integerBreak(int n) {
+        if(n <= 3) return n -1;
+
+        int tmp = n / 3;
+        int remain = n % 3;
+
+        if(remain == 0) return (int)Math.pow(3,tmp);
+        else if(remain == 1) return (int)Math.pow(3,tmp-1) * 4;
+        else return (int)Math.pow(3,tmp) * 2;
+    }
+
+    //双指针
+    public int threeSumClosest(int[] nums, int target) {
+        Arrays.sort(nums);
+        int ans = nums[0] + nums[1] + nums[2];
+        for(int i=0;i<nums.length;i++) {
+            int start = i+1, end = nums.length - 1;
+            while(start < end) {
+                int sum = nums[start] + nums[end] + nums[i];
+                if(Math.abs(target - sum) < Math.abs(target - ans))
+                    ans = sum;
+                if(sum > target)
+                    end--;
+                else if(sum < target)
+                    start++;
+                else
+                    return ans;
+            }
+        }
+        return ans;
+    }
+
+    //头尾指针
+    public int maxArea(int[] height) {
+        int len = height.length;
+        int start = 0;
+        int end = len - 1;
+
+
+        int res = Integer.MIN_VALUE;
+        while (start < end){
+            int total = Math.min(height[start],height[end]) * (end - start);
+            if(total > res) res = total;
+
+            if(height[start] < height[end]) start++;
+            else if(height[start] > height[end]) end--;
+            else {
+                start++;
+                end--;
+            }
+        }
+
+        return res;
+    }
+
+    //单调栈解法。
+    //我们还遗漏了一个要求：原字符串 ss 中的每个字符都需要出现在新字符串中，且只能出现一次。为了让新字符串满足该要求，之前讨论的算法需要进行以下两点的更改。
+    //
+    //在考虑字符 s[i]s[i] 时，如果它已经存在于栈中，则不能加入字符 s[i]s[i]。为此，需要记录每个字符是否出现在栈中。
+    //
+    //在弹出栈顶字符时，如果字符串在后面的位置上再也没有这一字符，则不能弹出栈顶字符。为此，需要记录每个字符的剩余数量，当这个值为 00 时，就不能弹出栈顶字符了。
+    public String removeDuplicateLetters(String s) {
+        Map<Character,Integer> map = new HashMap<>();
+        int len = s.length();
+        for(int i  = 0; i < len; i++){
+            map.put(s.charAt(i),map.getOrDefault(s.charAt(i),0) + 1);
+        }
+
+        Stack<Character> stack = new Stack<>();
+        int[] is_contain = new int[26];
+        for(int i = 0;i < len; i++){
+            while(!stack.isEmpty() && stack.peek() > s.charAt(i)
+                    && map.get(stack.peek()) > 1 && is_contain[s.charAt(i) - 'a'] == 0){
+                char tmp = stack.pop();
+                is_contain[tmp - 'a'] = 0;
+                map.put(tmp,map.get(tmp) - 1);
+            }
+
+            if(is_contain[s.charAt(i) - 'a'] == 0){
+                stack.push(s.charAt(i));
+                is_contain[s.charAt(i) - 'a'] = 1;
+            }
+            else {
+                map.put(s.charAt(i),map.get(s.charAt(i)) - 1);
+            }
+
+
+        }
+
+        StringBuilder res = new StringBuilder();
+        while(!stack.isEmpty()){
+            res.append(stack.pop());
+        }
+
+        return res.reverse().toString();
+    }
+
+
+    //Two pointers, 0 and 1;
+    public int removeDuplicates2(int[] nums) {
+        int len = nums.length;
+        if(len <= 1) return len;
+        int first = 0;
+        int second = 1;
+
+        while(second < len){
+            if(nums[first] != nums[second]){
+                nums[first+1] = nums[second];
+                first++;
+            }
+
+            second++;
+        }
+
+        return first + 1;
+    }
+
+    public int triangleNumber(int[] nums) {
+        int len = nums.length;
+        if(len < 3) return 0;
+
+        Arrays.sort(nums);
+        int res = 0;
+        for(int i = 0; i < len - 2; i++){
+            for(int j = i + 1; j < len - 1; j++){
+
+                int second = j+1;
+
+                while(second < len && nums[second] < nums[i] + nums[j]){
+                    second++;
+                }
+
+                res += Math.max(second - (j+1),0);
+            }
+
+        }
+
+        return res;
+    }
+
+
+    //create dummy node and dummy.next = head;
+    //when cur.next.val == cur.next.next.val, 节点重复，删除所有 val == cur.next.val的节点;
+    //traverse until to the end.
+    public ListNode deleteDuplicates(ListNode head) {
+        ListNode dummy = new ListNode(-1, head);
+        ListNode cur = dummy;
+
+        while(cur.next != null && cur.next.next != null){
+            if(cur.next.val == cur.next.next.val){
+                int tmp = cur.next.val;
+                while(cur.next != null && cur.next.val == tmp){
+                    cur.next = cur.next.next;
+                }
+            }
+            else {
+                cur = cur.next;
+            }
+        }
+
+        return dummy.next;
+    }
+
+
+    //单调递增栈！
+    public String removeKdigits(String num, int k) {
+        int len = num.length();
+        Stack<Character> stack = new Stack<>();
+
+        for(int i = 0; i < len; i++){
+            while(!stack.isEmpty() && stack.peek() > num.charAt(i) && k > 0){
+                stack.pop();
+                k--;
+            }
+
+            stack.push(num.charAt(i));
+        }
+
+        while(!stack.isEmpty() && k > 0){
+            stack.pop();
+            k--;
+        }
+
+        if(stack.isEmpty()) return "0";
+        if(stack.size() == 1) return stack.pop().toString();
+        StringBuilder res = new StringBuilder();
+        while(!stack.isEmpty()){
+            res.append(stack.pop());
+        }
+
+        res = res.reverse();
+        int index = 0;
+        while(index < res.length() - 1 && res.charAt(index) == '0') index++;
+
+        return res.substring(index).toString();
+    }
+
 }
 
 // Definition for a Node with random point.
