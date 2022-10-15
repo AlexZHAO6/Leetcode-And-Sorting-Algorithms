@@ -21,6 +21,7 @@ public class LeetcodeAlgorithms {
 
 class leetcode{
     private final static Random random = new Random();
+    private int treenode_ans;
 
 
     Map<Node,Node> cachemap = new HashMap<>();
@@ -3015,6 +3016,451 @@ class leetcode{
         return res.substring(index).toString();
     }
 
+    //
+    public int findLengthOfLCIS(int[] nums) {
+        int len = nums.length;
+        if(len < 2) return len;
+
+
+        int start = 0, end = 1;
+        int res = 0;
+        int tmp = 1;
+        while(end < len){
+            if(nums[start] < nums[end]){
+                start++;
+                end++;
+                tmp++;
+            }
+            else {
+                res = Math.max(tmp,res);
+                tmp = 1;
+                start = end;
+                end++;
+            }
+        }
+
+        return Math.max(res,tmp);
+    }
+
+
+    //Two pointer both start from 0;
+    public int minSubArrayLen(int target, int[] nums) {
+        int len = nums.length;
+        if(len < 2) return nums[0] >= target ? 1 : 0;
+
+        int start = 0, end = 0;
+        int tmp = nums[start];
+        if(tmp >= target) return 1;
+        int res = Integer.MAX_VALUE;
+        while(start <= end && end < len){
+            if(tmp >= target){
+                int leng = end - start + 1;
+                res = Math.min(leng,res);
+                if(res == 1) return res;
+
+                tmp -= nums[start];
+                start++;
+            }
+            else {
+                end++;
+                if(end < len)  tmp += nums[end];
+            }
+        }
+
+        return res == Integer.MAX_VALUE ? 0 : res;
+    }
+
+
+    //Two pointers both starts from 0;
+    public int lengthOfLongestSubstring(String s) {
+        Map<Character,Integer> map = new HashMap<>();
+        int len = s.length();
+        if(len < 2) return len;
+
+        int res = 0;
+        int tmp = 0;
+        int start = 0, end = 0;
+        while(end < len){
+            if(map.isEmpty() || !map.containsKey(s.charAt(end))){
+                map.put(s.charAt(end),end);
+                tmp++;
+                end++;
+            }
+            else {
+                res = Math.max(res,tmp);
+                int index = map.get(s.charAt(end));
+                while(start <= index){
+                    map.remove(s.charAt(start));
+                    start++;
+                }
+                tmp = end - start + 1;
+            }
+        }
+
+        return Math.max(res,tmp);
+    }
+
+
+    //固定滑动窗口大小为p.length;
+    //使用数组存每个字符的出现次数;
+    //初始把p的字符出现次数存入，只需要存一次;存入s的前p个字符并判断是否相同;
+    //窗口起始点滑动，每次滑动加入末尾字符，删去起始字符，然后比较即可。
+    public List<Integer> findAnagrams(String s, String p) {
+        int sLen = s.length(), pLen = p.length();
+
+        if (sLen < pLen) {
+            return new ArrayList<Integer>();
+        }
+
+        List<Integer> ans = new ArrayList<Integer>();
+        int[] sCount = new int[26];
+        int[] pCount = new int[26];
+        for (int i = 0; i < pLen; ++i) {
+            ++sCount[s.charAt(i) - 'a'];
+            ++pCount[p.charAt(i) - 'a'];
+        }
+
+        if (Arrays.equals(sCount, pCount)) {
+            ans.add(0);
+        }
+
+        for (int i = 0; i < sLen - pLen; ++i) {
+            --sCount[s.charAt(i) - 'a']; //删去起始字符
+            ++sCount[s.charAt(i + pLen) - 'a']; //加入末尾字符
+
+            //比较字符频率
+            if (Arrays.equals(sCount, pCount)) {
+                ans.add(i + 1);
+            }
+        }
+
+        return ans;
+    }
+
+    //固定窗口长度 = s1.length(), 滑动！
+    public boolean checkInclusion(String s1, String s2) {
+        int s1len = s1.length();
+        int s2len = s2.length();
+
+        if(s2len < s1len) return false;
+
+        int[] s1count = new int[26];
+        int[] s2count = new int[26];
+
+        for(int i  = 0; i < s1len; i++){
+            s1count[s1.charAt(i) - 'a']++;
+            s2count[s2.charAt(i) - 'a']++;
+        }
+        if(Arrays.equals(s1count,s2count)) return true;
+
+        for(int i = 0; i < s2len - s1len; i++){
+            s2count[s2.charAt(i) - 'a']--;
+            s2count[s2.charAt(i+s1len) - 'a']++;
+
+            if(Arrays.equals(s1count,s2count)) return true;
+        }
+
+
+        return false;
+    }
+
+
+    //建立2个链表，再把small.next = largeHead.next;
+    public ListNode partition(ListNode head, int x) {
+        ListNode small = new ListNode(0);
+        ListNode smallHead = small;
+        ListNode large = new ListNode(0);
+        ListNode largeHead = large;
+        while (head != null) {
+            if (head.val < x) {
+                small.next = head;
+                small = small.next;
+            } else {
+                large.next = head;
+                large = large.next;
+            }
+            head = head.next;
+        }
+        large.next = null;
+        small.next = largeHead.next;
+        return smallHead.next;
+    }
+
+
+    //保存奇节点末尾与偶节点头部，遍历修改.next = .next.next;
+    //最后把奇节点末尾与偶节点头部拼接;
+    public ListNode oddEvenList(ListNode head) {
+        ListNode dummy = new ListNode(-1,head);
+        int count = 1;
+
+
+        ListNode tmp_odd = head;
+        if(tmp_odd == null) return head;
+        ListNode tmp_even = head.next;
+        if(tmp_even == null) return head;
+        while(head.next != null){
+            ListNode tmp_node = head.next;
+            head.next = head.next.next;
+            head = tmp_node;
+            count++;
+
+
+            if(count % 2 != 0) {
+                tmp_odd = head;
+            }
+        }
+
+        tmp_odd.next = tmp_even;
+
+        return dummy.next;
+    }
+
+
+    //end++, until end - start + 1 > maxCount + k; start++后更新res;
+    //继续滑动右端点;
+    public int characterReplacement(String s, int k) {
+        int len = s.length();
+        if(len < 2) return len;
+
+        int[] freqs = new int[26];
+        int start = 0, end = 0;
+        int res = 0;
+        int maxCount = 0;
+
+        while (end < len){
+            freqs[s.charAt(end) - 'A']++;
+            maxCount = Math.max(maxCount, freqs[s.charAt(end) - 'A']);
+
+            /**start++后，maxCount不需要更新，对结果不影响！！
+             * 因为start++后的长度 = start++前且end++前的长度，而该长度满足len <= maxCount + k;
+             * 除非出现一个比导致左端点移动的历史最大重复次数字符出现次数更大的字符，否则滑动窗口就会一直以当前长度一直滑动下去。
+             * 所以maxCount只会保持不变和增长，减小是没有意义的，故不需要重新遍历滑动窗口维护。
+             * **/
+            if(end - start + 1 > maxCount + k){
+                freqs[s.charAt(start) - 'A']--;
+                start++;
+            }
+
+            res = Math.max(res, end - start + 1);
+            end++;
+
+        }
+
+        return res;
+    }
+
+    public boolean isPalindrome(ListNode head) {
+        List<Integer> vals = new ArrayList<Integer>();
+
+        // 将链表的值复制到数组中
+        ListNode currentNode = head;
+        while (currentNode != null) {
+            vals.add(currentNode.val);
+            currentNode = currentNode.next;
+        }
+
+        // 使用双指针判断是否回文
+        int front = 0;
+        int back = vals.size() - 1;
+        while (front < back) {
+            if (!vals.get(front).equals(vals.get(back))) {
+                return false;
+            }
+            front++;
+            back--;
+        }
+        return true;
+    }
+
+    //Slow pointer and Fast pointer
+    /**
+     * 根据题意，任意时刻，\textit{fast}fast 指针走过的距离都为 \textit{slow}slow 指针的 2 倍。因此，我们有
+     *
+     * a+(n+1)b+nc=2(a+b) a=c+(n-1)(b+c)
+     * a+(n+1)b+nc=2(a+b)⟹a=c+(n−1)(b+c)
+     *
+     * 有了 a=c+(n-1)(b+c)a=c+(n−1)(b+c) 的等量关系，我们会发现：从相遇点到入环点的距离加上 n-1n−1 圈的环长，恰好等于从链表头部到入环点的距离。
+     *
+     * 因此，当发现 \textit{slow}slow 与 \textit{fast}fast 相遇时，我们再额外使用一个指针 \textit{ptr}ptr。
+     * 起始，它指向链表头部；随后，它和 \textit{slow}slow 每次向后移动一个位置。最终，它们会在入环点相遇。
+     *
+     */
+    public ListNode detectCycle(ListNode head) {
+        if(head == null || head.next == null) return null;
+        ListNode slow = head;
+        ListNode fast = head;
+
+        while(fast != null && fast.next != null){
+            slow = slow.next;
+            fast = fast.next.next;
+
+            if(slow == fast) break;
+        }
+
+        if(slow == fast){
+            slow = head;
+            while(slow != fast){
+                slow = slow.next;
+                fast = fast.next;
+            }
+            return slow;
+        }
+        else {
+            return null;
+        }
+
+    }
+
+
+    //Similar to find the loop in the linked-list!;
+    /**
+     * 我们对 nums 数组建图，每个位置 i 连一条 i → nums[i] 的边。
+     * 由于存在的重复的数字 \textit{target}target，因此 \textit{target}target 这个位置一定有起码两条指向它的边，
+     * 因此整张图一定存在环，且我们要找到的 \textit{target}target 就是这个环的入口，那么整个问题就等价于 142. 环形链表 II。
+     */
+    public int findDuplicate(int[] nums) {
+        int slow = 0;
+        int fast = 0;
+
+        slow = nums[slow];
+        fast = nums[nums[fast]];
+
+        while(slow != fast){
+            slow = nums[slow];
+            fast = nums[nums[fast]];
+        }
+        slow = 0;
+        while (slow != fast){
+            slow = nums[slow];
+            fast = nums[fast];
+        }
+
+        return slow;
+    }
+
+
+    //先找到中间节点，后半部分reverse，再依次拼接head与reversehead!
+    public void reorderList(ListNode head) {
+        if (head == null) {
+            return;
+        }
+        ListNode mid = middleNode(head);
+        ListNode l1 = head;
+        ListNode l2 = mid.next;
+        mid.next = null;
+        l2 = reverseList2(l2);
+        mergeList(l1, l2);
+    }
+
+    public ListNode middleNode(ListNode head) {
+        ListNode slow = head;
+        ListNode fast = head;
+        while (fast.next != null && fast.next.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        return slow;
+    }
+
+    public ListNode reverseList2(ListNode head) {
+        ListNode prev = null;
+        ListNode curr = head;
+        while (curr != null) {
+            ListNode nextTemp = curr.next;
+            curr.next = prev;
+            prev = curr;
+            curr = nextTemp;
+        }
+        return prev;
+    }
+
+    public void mergeList(ListNode l1, ListNode l2) {
+        ListNode l1_tmp;
+        ListNode l2_tmp;
+        while (l1 != null && l2 != null) {
+            l1_tmp = l1.next;
+            l2_tmp = l2.next;
+
+            l1.next = l2;
+            l1 = l1_tmp;
+
+            l2.next = l1;
+            l2 = l2_tmp;
+        }
+    }
+
+
+    //Use recursion!
+    public boolean isSameTree(TreeNode p, TreeNode q) {
+        if(p == null && q == null) return true;
+        if(p == null || q == null) return false;
+
+        return p.val == q.val && isSameTree(p.left,q.left) && isSameTree(p.right,q.right);
+    }
+
+    //Recursion for the binary tree!
+    public boolean isSymmetric(TreeNode root) {
+        TreeNode p = root;
+        TreeNode q = root;
+
+        return isSymmetric_help(p,q);
+    }
+    public boolean isSymmetric_help(TreeNode p, TreeNode q){
+        if(p == null && q == null) return true;
+        if(p == null || q == null) return false;
+        if(p.val != q.val) return false;
+
+        return isSymmetric_help(p.left,q.right) &&  isSymmetric_help(p.right,q.left);
+    }
+
+    //Recursion for the binary tree
+    public TreeNode invertTree(TreeNode root) {
+/*      if(root == null) return null;
+
+        TreeNode tmp = root.left;
+        root.left = invertTree(root.right);
+        root.right = invertTree(tmp);
+
+        return root;*/
+        if (root == null) {
+            return null;
+        }
+        TreeNode left = invertTree(root.left);
+        TreeNode right = invertTree(root.right);
+        root.left = right;
+        root.right = left;
+        return root;
+    }
+
+    //Recursion for the binary tree! Length = MaxDepth(left) + MaxDepth(right) + 1
+    //Recursion for every node and calculate the Length!
+    public int diameterOfBinaryTree(TreeNode root) {
+        treenode_ans = 1;
+        diameter_help(root);
+        return treenode_ans - 1;
+    }
+    public int diameter_help(TreeNode root){
+        if(root == null) return 0;
+
+        int L = diameter_help(root.left);
+        int R = diameter_help(root.right);
+
+        treenode_ans = Math.max(treenode_ans,L+R+1);
+        return Math.max(L,R)+1;
+    }
+
+    //Recursion for the binary tree!
+    //利用完全二叉树性质可以给节点编号，编号的二进制可以代表到达节点的路径，判断最后一层的最大节点编号可以得到整个树的节点个数！！
+    //在最后一层根据节点编号范围使用二分查找，根据路径判断节点是否为NULL.
+    public int countNodes(TreeNode root) {
+        if(root == null) return 0;
+
+        int L = countNodes(root.left);
+        int R = countNodes(root.right);
+
+        return L + R + 1;
+    }
+
 }
 
 // Definition for a Node with random point.
@@ -3074,4 +3520,19 @@ class NumMatrix {
         return res;
     }
 }
+
+
+class TreeNode {
+      int val;
+      TreeNode left;
+      TreeNode right;
+      TreeNode() {}
+      TreeNode(int val) { this.val = val; }
+      TreeNode(int val, TreeNode left, TreeNode right) {
+          this.val = val;
+          this.left = left;
+          this.right = right;
+      }
+}
+
 
