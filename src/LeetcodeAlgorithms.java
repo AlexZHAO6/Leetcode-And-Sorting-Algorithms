@@ -3645,7 +3645,7 @@ class leetcode{
      * :叶子节点是指没有子节点的节点，这句话的意思是仅当left,right 都为null时才算数。！！
      * 最小深度是从根节点到最近叶子节点的最短路径上的节点数量。!
      */
-    public int minDepth(TreeNode root) {g
+    public int minDepth(TreeNode root) {
         if(root == null) return 0;
         if(root.left == null && root.right == null) return 1;
 
