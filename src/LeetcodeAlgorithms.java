@@ -3461,6 +3461,203 @@ class leetcode{
         return L + R + 1;
     }
 
+    //先入队列，记住队列长度，然后poll出队列长度的Node就是这一层所有的node！
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        List<List<Integer>> res = new LinkedList<>();
+        if(root == null) return res;
+        Queue<TreeNode> queue = new LinkedList<>();
+
+        queue.offer(root);
+        while(!queue.isEmpty()){
+            int size = queue.size();
+            List<Integer> tmp_list = new LinkedList<>();
+            for(int i = 0; i < size; i++){
+                TreeNode tmp = queue.poll();
+                tmp_list.add(tmp.val);
+                if(tmp.left != null) queue.offer(tmp.left);
+                if(tmp.right != null) queue.offer(tmp.right);
+            }
+            res.add(tmp_list);
+        }
+
+
+        return res;
+    }
+
+    //用Pair<k,v>数据结构，给节点编号；
+    //注意溢出问题！
+    public int widthOfBinaryTree(TreeNode root) {
+        long res = 0;
+        if(root == null) return 0;
+
+        Queue<AbstractMap.SimpleEntry<TreeNode,Long>> queue = new LinkedList<AbstractMap.SimpleEntry<TreeNode,Long>>();
+
+        queue.offer(new AbstractMap.SimpleEntry<>(root,1L));
+
+        while(!queue.isEmpty()){
+            int size = queue.size();
+            long min = 0;
+            long max = 0;
+            boolean flag = false;
+            for(int i = 0; i < size; i++){
+                AbstractMap.SimpleEntry<TreeNode,Long> tmp_pair = queue.poll();
+                if(flag == false){
+                    min = tmp_pair.getValue();
+                    flag = true;
+                }
+                max = Math.max(max,tmp_pair.getValue());
+                if(tmp_pair.getKey().left != null) {
+                    queue.offer(new AbstractMap.SimpleEntry<>(tmp_pair.getKey().left, tmp_pair.getValue()*2));
+                }
+                if(tmp_pair.getKey().right != null){
+                    queue.offer(new AbstractMap.SimpleEntry<>(tmp_pair.getKey().right, tmp_pair.getValue()*2+1));
+                }
+            }
+
+            res = Math.max(res,max-min+1);
+        }
+
+        return (int)res;
+    }
+
+    //入队列，先右再左，保证最后一个节点就是最后一层最左边的节点！！
+    public int findBottomLeftValue(TreeNode root) {
+        Queue<TreeNode> queue = new LinkedList<>();
+        int res = root.val;
+        queue.offer(root);
+        while(!queue.isEmpty()){
+            TreeNode tmp = queue.poll();
+            res = tmp.val;
+            if(tmp.right != null) queue.offer(tmp.right);
+            if(tmp.left != null) queue.offer(tmp.left);
+
+
+        }
+
+        return res;
+    }
+
+
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+        List<List<Integer>> res = new LinkedList<>();
+        if(root == null) return res;
+
+        int countLevel = 1;
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+
+        while(!queue.isEmpty()){
+            int size = queue.size();
+            List<Integer> tmpList = new LinkedList<>();
+            for(int i = 0; i < size; i++){
+                TreeNode tmp = queue.poll();
+                tmpList.add(tmp.val);
+                if(tmp.left != null) queue.offer(tmp.left);
+                if(tmp.right != null) queue.offer(tmp.right);
+            }
+            if(countLevel % 2 == 0) Collections.reverse(tmpList);
+            countLevel++;
+            res.add(tmpList);
+        }
+
+        return res;
+    }
+
+    public List<List<Integer>> levelOrderBottom(TreeNode root) {
+        List<List<Integer>> res = new LinkedList<>();
+        if(root == null) return res;
+        Queue<TreeNode> queue = new LinkedList<>();
+
+        queue.offer(root);
+        while(!queue.isEmpty()){
+            int size = queue.size();
+            List<Integer> tmp_list = new LinkedList<>();
+            for(int i = 0; i < size; i++){
+                TreeNode tmp = queue.poll();
+                tmp_list.add(tmp.val);
+                if(tmp.left != null) queue.offer(tmp.left);
+                if(tmp.right != null) queue.offer(tmp.right);
+            }
+            res.add(0,tmp_list);
+        }
+
+        return res;
+    }
+
+    public TreeNode addOneRow(TreeNode root, int val, int depth) {
+        Queue<TreeNode> queue = new LinkedList<>();
+        int countLevel = 1;
+        TreeNode res = new TreeNode();
+        if(depth == 1){
+            res.val = val;
+            res.left = root;
+            return res;
+        }
+
+        queue.offer(root);
+        while(!queue.isEmpty()){
+            int size = queue.size();
+
+            for(int i = 0; i < size; i++){
+                if(countLevel < depth - 1){
+                    TreeNode tmp = queue.poll();
+                    if(tmp.left != null) queue.offer(tmp.left);
+                    if(tmp.right != null) queue.offer(tmp.right);
+                }
+                else if(countLevel == depth - 1){
+                    TreeNode tmp = queue.poll();
+                    TreeNode Left = tmp.left;
+                    TreeNode Right = tmp.right;
+                    TreeNode newLeft = new TreeNode(val);
+                    TreeNode newRight = new TreeNode(val);
+                    tmp.left = newLeft;
+                    tmp.right = newRight;
+                    newLeft.left = Left;
+                    newRight.right = Right;
+
+                }
+                else{
+                    return root;
+                }
+            }
+            countLevel++;
+        }
+
+        return root;
+    }
+
+    public int maxDepth(TreeNode root) {
+        if(root == null) return 0;
+
+        int maxleft = maxDepth(root.left);
+        int maxright = maxDepth(root.right);
+
+        return Math.max(maxleft,maxright) + 1;
+    }
+
+    /**
+     * 另外这道题的关键是搞清楚递归结束条件
+     *
+     * 叶子节点的定义是左孩子和右孩子都为 null 时叫做叶子节点
+     * 当 root 节点左右孩子都为空时，返回 1
+     * 当 root 节点左右孩子有一个为空时，返回不为空的孩子节点的深度
+     * 当 root 节点左右孩子都不为空时，返回左右孩子较小深度的节点值
+     * :叶子节点是指没有子节点的节点，这句话的意思是仅当left,right 都为null时才算数。！！
+     * 最小深度是从根节点到最近叶子节点的最短路径上的节点数量。!
+     */
+    public int minDepth(TreeNode root) {g
+        if(root == null) return 0;
+        if(root.left == null && root.right == null) return 1;
+
+        int minleft = minDepth(root.left);
+        int minright = minDepth(root.right);
+
+        if(root.left == null || root.right == null) return minleft + minright;
+
+        return Math.min(minleft,minright) + 1;
+    }
+
+
 }
 
 // Definition for a Node with random point.
