@@ -1,7 +1,5 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class test {
@@ -26,6 +24,11 @@ public class test {
         res = res.reverse();
         System.out.println(res);
         System.out.println(res2);
+
+        //this is how to get current time in java
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        Date date = new Date();
+        System.out.println(formatter.format(date));
 
     }
 }

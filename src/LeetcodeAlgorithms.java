@@ -3657,6 +3657,415 @@ class leetcode{
         return Math.min(minleft,minright) + 1;
     }
 
+    public List<Integer> rightSideView(TreeNode root) {
+        List<Integer> res = new LinkedList<>();
+        if(root == null) return res;
+        Queue<TreeNode> queue = new LinkedList<>();
+
+        queue.offer(root);
+        while(!queue.isEmpty()){
+            int size = queue.size();
+            for(int i = 0; i < size; i++){
+                TreeNode tmp = queue.poll();
+                if(i == 0) res.add(tmp.val);
+                if(tmp.right != null) queue.offer(tmp.right);
+                if(tmp.left != null) queue.offer(tmp.left);
+            }
+
+        }
+
+
+        return res;
+    }
+
+    //recursion preorder
+    public List<Integer> preorderTraversal(TreeNode root) {
+        List<Integer> res = new LinkedList<>();
+
+        preorderHelp(res, root);
+
+        return res;
+    }
+    public void preorderHelp(List<Integer> res, TreeNode root){
+        if(root == null) return;
+        res.add(root.val);
+        preorderHelp(res, root.left);
+        preorderHelp(res, root.right);
+    }
+
+
+    //iteration preorder, use stack push root, push left, push right;
+    public List<Integer> preorderTraversal_iter(TreeNode root) {
+        List<Integer> res = new ArrayList<Integer>();
+        if (root == null) {
+            return res;
+        }
+
+        Deque<TreeNode> stack = new LinkedList<TreeNode>();
+        TreeNode node = root;
+        while (!stack.isEmpty() || node != null) {
+            while (node != null) {
+                res.add(node.val);
+                stack.push(node);
+                node = node.left;
+            }
+            node = stack.pop();
+            node = node.right;
+        }
+        return res;
+    }
+
+    //递归实现，递归传递上层结果，在本层新建Stringbuilder，append上层结果 --> 防止重复叠加已有node！！
+    public int sumNumbers(TreeNode root) {
+        StringBuilder res = new StringBuilder();
+
+        int nums = sumHelp(res, root);
+        return nums;
+    }
+    public int sumHelp(StringBuilder res, TreeNode root){
+        if(root == null) return 0;
+
+        StringBuilder tmp = new StringBuilder(res);
+        tmp.append(root.val);
+
+        if(root.left == null && root.right == null){
+            return Integer.parseInt(tmp.toString());
+        }
+        else {
+            return sumHelp(tmp, root.left) + sumHelp(tmp, root.right);
+        }
+
+    }
+
+    public List<Integer> postorderTraversal(TreeNode root) {
+        List<Integer> res = new LinkedList<>();
+        postorder_help(res, root);
+        return res;
+    }
+    public void postorder_help(List<Integer> res, TreeNode root){
+        if(root == null) return;
+
+        postorder_help(res, root.left);
+        postorder_help(res, root.right);
+        res.add(root.val);
+    }
+
+
+    //postorder iteration, add left, add right, add root;
+    //use prev to record the previous node!
+    //中序遍历中，从栈中弹出的节点，其左子树是访问完了，可以直接访问该节点，然后接下来访问右子树。
+    //后序遍历中，从栈中弹出的节点，我们只能确定其左子树肯定访问完了，但是无法确定右子树是否访问过。
+    //因此，我们在后序遍历中，引入了一个prev来记录历史访问记录。
+    public List<Integer> postorderTraversal2(TreeNode root) {
+        List<Integer> res = new ArrayList<Integer>();
+        if (root == null) {
+            return res;
+        }
+
+        Deque<TreeNode> stack = new LinkedList<TreeNode>();
+        TreeNode prev = null;
+        while (root != null || !stack.isEmpty()) {
+            while (root != null) {
+                stack.push(root);
+                root = root.left;
+            }
+
+            //现在需要确定的是是否有右子树，或者右子树是否访问过
+            //如果没有右子树，或者右子树访问完了，也就是上一个访问的节点是右子节点时
+            //说明可以访问当前节点
+            root = stack.pop();
+            if (root.right == null || root.right == prev) {
+                res.add(root.val);
+                //更新历史访问记录，这样回溯的时候父节点可以由此判断右子树是否访问完成
+                prev = root;
+                root = null;
+            } else {
+                //如果右子树没有被访问，那么将当前节点压栈，访问右子树
+                stack.push(root);
+                root = root.right;
+            }
+        }
+        return res;
+    }
+
+
+
+    public List<Integer> inorderTraversal(TreeNode root) {
+        List<Integer> res = new LinkedList<>();
+        inorder_help(res, root);
+        return res;
+    }
+    public void inorder_help(List<Integer> res, TreeNode root){
+        if(root == null) return;
+
+        inorder_help(res, root.left);
+        res.add(root.val);
+        inorder_help(res, root.right);
+    }
+
+    //inorder iteration!
+    //
+    public List<Integer> inorderTraversal2(TreeNode root) {
+        List<Integer> res = new ArrayList<Integer>();
+        Deque<TreeNode> stk = new LinkedList<TreeNode>();
+        while (root != null || !stk.isEmpty()) {
+            while (root != null) {
+                stk.push(root);
+                root = root.left;
+            }
+
+            // 此时root==null，说明上一步的root没有左子树
+            // 1. 执行左出栈。因为此时root==null，导致root.right一定为null
+            // 2. 执行下一次外层while代码块，根出栈。此时root.right可能存在
+            // 3a. 若root.right存在，右入栈，再出栈
+            // 3b. 若root.right不存在，重复步骤2
+            root = stk.pop();
+            res.add(root.val);
+            root = root.right;
+        }
+        return res;
+    }
+
+
+    //二叉搜索树，root > 左子树最大， root < 右子树最小. Recursion!!
+    public boolean isValidBST(TreeNode root) {
+        if(root == null) return true;
+        if(root.left == null && root.right == null) return true;
+
+        if(root.left == null){
+            return isValidBST(root.right) && root.val < finSmallest(root.right);
+        }
+
+        if(root.right == null){
+            return isValidBST(root.left) && root.val > findLargest(root.left);
+        }
+
+        return isValidBST(root.left) && isValidBST(root.right)
+                && root.val < finSmallest(root.right) && root.val > findLargest(root.left);
+    }
+    public int findLargest(TreeNode root){
+        while(root != null && root.right != null){
+            root = root.right;
+        }
+        return root.val;
+    }
+    public int finSmallest(TreeNode root){
+        while(root != null && root.left != null){
+            root = root.left;
+        }
+        return root.val;
+    }
+
+    //利用二叉树性质二分查找节点
+    //找到之后根据节点是否有左右子树分别处理，若左右子树都存在 则将左子树放到右子树最小节点下面。
+    public TreeNode deleteNode(TreeNode root, int key) {
+        if (root == null) return null;
+        if(root.val < key) root.left = deleteNode(root.left, key);
+        else if(root.val > key) root.right = deleteNode(root.right, key);
+        else {
+            if (root.left == null) return root.right;
+            if (root.right == null) return root.left;
+            TreeNode t = root.right;
+            while (t.left != null) t = t.left;
+            t.left = root.left;
+
+            return root.right;
+        }
+        return root;
+    }
+
+
+    //找到节点不满足就删除，删除后接着递归的找，有点笨.
+    public TreeNode trimBST(TreeNode root, int low, int high) {
+        if(root == null) return null;
+        if(root.val >= low && root.val <= high){
+            root.left = trimBST(root.left, low, high);
+            root.right = trimBST(root.right, low, high);
+        }
+        else {
+            if(root.left == null && root.right == null){
+                root = null;
+            }
+            else if(root.left == null){
+                root = root.right;
+                root = trimBST(root, low, high);
+
+            }
+            else if(root.right == null){
+                root = root.left;
+                root = trimBST(root, low, high);
+            }
+            else{
+                TreeNode tmp = root.right;
+                while(tmp.left != null) tmp = tmp.left;
+                tmp.left = root.left;
+                root = root.right;
+                root = trimBST(root, low, high);
+
+            }
+        }
+
+        return root;
+    }
+
+    //clever solution
+    //root < low,则root和左子树都要删除。 root > high, 则root和右子树都要删除。
+    public TreeNode trimBST2(TreeNode root, int low, int high) {
+        if (root == null) {
+            return null;
+        }
+        if (root.val < low) {
+            return trimBST(root.right, low, high);
+        } else if (root.val > high) {
+            return trimBST(root.left, low, high);
+        } else {
+            root.left = trimBST(root.left, low, high);
+            root.right = trimBST(root.right, low, high);
+            return root;
+        }
+    }
+
+    public boolean isBalanced(TreeNode root) {
+        if(root == null) return true;
+        if(Math.abs(getDepth(root.left) - getDepth(root.right)) > 1) return false;
+
+        return isBalanced(root.left) && isBalanced(root.right);
+    }
+    public int getDepth(TreeNode root){
+        if(root == null) return 0;
+        if(root.left == null && root.right == null) return 1;
+
+        int left = getDepth(root.left);
+        int right = getDepth(root.right);
+
+        return Math.max(left,right) + 1;
+    }
+
+
+    //总选择中间的数作为根节点，遍历;
+    public TreeNode sortedArrayToBST(int[] nums) {
+        return helper(nums, 0, nums.length - 1);
+    }
+
+    public TreeNode helper(int[] nums, int left, int right) {
+        if (left > right) {
+            return null;
+        }
+
+        // 总是选择中间位置左边的数字作为根节点
+        int mid = (left + right) / 2;
+
+        TreeNode root = new TreeNode(nums[mid]);
+        root.left = helper(nums, left, mid - 1);
+        root.right = helper(nums, mid + 1, right);
+        return root;
+    }
+
+
+    //递归+回溯！！
+    public List<TreeNode> generateTrees(int n) {
+        return generate_help(1, n);
+    }
+    public List<TreeNode> generate_help(int start, int end){
+        List<TreeNode> allTrees = new LinkedList<>();
+        if(start > end){
+            allTrees.add(null);
+            return allTrees;
+        }
+
+        for(int i = start; i <= end; i++){
+            List<TreeNode> leftlist = generate_help(start, i - 1);
+            List<TreeNode> rightlist = generate_help(i + 1, end);
+
+            for(TreeNode left : leftlist){
+                for(TreeNode right : rightlist){
+                    //obj类型，每次赋值要新建，不然赋值会覆盖！！;
+                    TreeNode root = new TreeNode(i);
+                    root.left = left;
+                    root.right = right;
+                    allTrees.add(root);
+                }
+            }
+        }
+
+        return allTrees;
+    }
+
+    //根据前序找到根，根据根在中序位置确定左右子树个数
+    //递归构造左右子树！！
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        int len = preorder.length;
+        Map<Integer, Integer> map = new HashMap<>();
+        for(int i = 0; i < len; i++){
+            map.put(inorder[i], i);
+        }
+
+        return buildTree_help(map, preorder,0, len-1, inorder,0, len-1);
+    }
+    public TreeNode buildTree_help(Map<Integer, Integer> map, int[] preorder,
+                                   int preLeft, int preRight, int[] inorder, int inLeft, int inRight){
+        if (preLeft > preRight) {
+            return null;
+        }
+
+        TreeNode root = new TreeNode(preorder[preLeft]);
+
+        int pIndex = map.get(root.val);
+
+        root.left = buildTree_help(map, preorder, preLeft+1, pIndex-inLeft+preLeft, inorder, inLeft, pIndex - 1);
+        root.right = buildTree_help(map, preorder, pIndex-inLeft+preLeft+1, preRight, inorder, pIndex+1, inRight);
+
+        return root;
+    }
+
+    //same logic as the previous one.
+    //Recursion!!!
+    public TreeNode buildTree2(int[] inorder, int[] postorder) {
+        int len = postorder.length;
+        Map<Integer, Integer> map = new HashMap<>();
+        for(int i = 0; i < len; i++){
+            map.put(inorder[i], i);
+        }
+
+        return buildTree_help2(map,postorder,0,len-1,inorder,0,len-1);
+    }
+    public TreeNode buildTree_help2(Map<Integer, Integer> map, int[] postorder,
+                                   int postLeft, int postRight, int[] inorder, int inLeft, int inRight){
+        if(postLeft > postRight) return null;
+
+        TreeNode root = new TreeNode(postorder[postRight]);
+        int pIndex = map.get(root.val);
+
+        root.left = buildTree_help2(map, postorder, postLeft, pIndex-inLeft+postLeft-1, inorder, inLeft, pIndex - 1);
+        root.right = buildTree_help2(map, postorder, pIndex-inLeft+postLeft, postRight - 1, inorder, pIndex+1, inRight);
+
+        return root;
+    }
+
+
+    //前序遍历结果保存在list里面，然后遍历list得到cur和next，cur.left=null,cur.right = next;
+    public void flatten(TreeNode root) {
+        List<TreeNode> list = new LinkedList<>();
+        inorderTra(root, list);
+
+        int len = list.size();
+        for(int i = 0; i < len -1; i++){
+            TreeNode cur = list.get(i);
+            TreeNode next = list.get(i+1);
+
+            cur.left = null;
+            cur.right = next;
+        }
+    }
+
+    public void inorderTra(TreeNode root, List<TreeNode> list){
+        if(root == null) return;
+        list.add(root);
+        inorderTra(root.left, list);
+        inorderTra(root.right, list);
+    }
+
+
 
 }
 
