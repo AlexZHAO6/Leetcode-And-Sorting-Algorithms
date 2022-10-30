@@ -1,0 +1,48 @@
+    public ListNode reverseBetween(ListNode head, int m, int n) {
+    	if(head == null)
+    		return null;
+    	ListNode pre = new ListNode(-1);
+    	ListNode cur = head;
+    	ListNode tmp = null;
+    	pre.next = cur;
+    	
+    	int index = 1;
+    	
+    	while(index != m && cur != null) {
+    		pre = cur;
+    		cur = cur.next;
+    		index++;
+    	}
+    	
+    	tmp = cur;
+    	while(index != n && tmp != null) {
+    		tmp = tmp.next;
+    		index++;
+    	}
+    	
+    	ListNode next = tmp.next;
+    	tmp.next = null;
+    	
+    	pre.next = reverse(cur);
+    	cur.next = next;
+    	
+    	if(m > 1)
+    		return head;
+    	else
+    		return tmp;
+
+    }
+    
+    private ListNode reverse(ListNode node) {
+    	ListNode pre = null;
+    	ListNode cur = node;
+    	
+    	while(cur != null) {
+    		ListNode next = cur.next;
+    		cur.next = pre;
+    		pre = cur;
+    		cur = next;
+    	}
+    	
+    	return pre;
+    }

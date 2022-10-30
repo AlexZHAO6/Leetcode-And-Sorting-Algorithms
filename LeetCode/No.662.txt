@@ -1,0 +1,45 @@
+    public int widthOfBinaryTree(TreeNode root) {
+    	Queue<NodewithPosition> queue = new LinkedList<>();
+    	if(root != null)
+    		queue.add(new NodewithPosition(root,0,1));
+    	int curdepth = 0;
+    	int left = 1;
+    	int res = 0;
+    	while(!queue.isEmpty()) {
+    		NodewithPosition tmp = queue.poll();
+    		if(tmp.node != null) {
+    			queue.add(new NodewithPosition(tmp.node.left, tmp.depth + 1, tmp.position * 2));
+    			queue.add(new NodewithPosition(tmp.node.right, tmp.depth + 1, tmp.position * 2 + 1));
+        		if(curdepth != tmp.depth) {
+        			curdepth = tmp.depth;
+        			left = tmp.position;
+        		}
+        		
+        		res = Math.max(res, tmp.position - left + 1);
+        		
+    		}
+    		
+
+
+    	}
+    	
+    	
+    	return res;
+        
+    }
+
+ 
+
+}
+
+class NodewithPosition{
+	TreeNode node;
+	int depth;
+	int position;
+	
+	NodewithPosition(TreeNode node, int d, int p){
+		this.node = node;
+		depth = d;
+		position = p;
+	}	
+}

@@ -1,0 +1,25 @@
+    
+    public List<Integer> findDuplicates(int[] nums) {
+    	int len = nums.length;
+    	List<Integer> res = new ArrayList<>();
+    	if(len == 0)
+    		return res;
+    	
+    	Arrays.parallelSort(nums);
+    	Stack<Integer> stack = new Stack<>();
+    	
+    	for(int i = 0; i < len; i++) {
+    		if(stack.isEmpty())
+    			stack.push(nums[i]);
+    		else{
+    			if(stack.peek() == nums[i])
+    				res.add(stack.pop());
+    			else
+    				stack.push(nums[i]);
+    		}
+    		
+    	}
+    	
+    	return res;
+
+    }

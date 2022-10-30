@@ -1,0 +1,39 @@
+public boolean makesquare(int[] nums) {
+        if(nums.length==0){
+            return false;
+        }
+        int total = 0;
+        //算和
+        for(int v:nums) total+=v;
+        if(total%4!=0)return false;
+        //求边长
+        int target = total/4;
+        return  backTrack(nums,new boolean[nums.length],4,target,0,0);
+    }
+    public boolean backTrack(int[] nums,boolean[] select,int k,int target,int start,int total){
+        //回溯算法 遍历整个决策树 寻找将nums拆分成4个子数组是否有可能
+        //base case 当k为0时说明可以拼成4个和相同的子数组
+        if(k==0){
+            return true;
+        }
+        //每次选择的数字总和等于target也就是正方形的边长时
+        //递归判断剩下的数组是否能拼成k-1个和为target的子数组
+        //这里start需要重置为0 但是有select数组在 所以不会重复选择元素
+        if(total==target){
+           return backTrack(nums,select,k-1,target,0,0);
+        }
+        //这里用start来避免大量的无效循环,因为遍历从左到右,在当前节点之前的元素无需再次判断
+        for(int i=start;i<nums.length;i++){
+            //如果当前元素没有被选择
+            //且当前元素加上已经选择的元素总和total 小于target时才会进到决策树的下一节点
+            //否则直接跳过
+            if(!select[i]&&total+nums[i]<=target){
+                select[i] = true;
+                if(backTrack(nums,select,k,target,i+1,total+nums[i])){
+                    return true;
+                }
+                select[i] = false;
+            }
+        }
+        return false;
+    }

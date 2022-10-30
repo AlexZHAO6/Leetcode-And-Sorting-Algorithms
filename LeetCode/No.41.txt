@@ -1,0 +1,28 @@
+    public int firstMissingPositive(int[] nums) {
+    	
+    	int len = nums.length;
+    	if(len == 0)
+    		return -1;
+    	Arrays.parallelSort(nums);
+    	HashMap<Integer,Integer> map = new HashMap<>();
+    	
+    	int biggest = nums[len-1];
+    	
+    	for(int i = 0; i < len; i++)
+    		map.put(nums[i], 1);
+    	
+    	if(biggest <= 0)
+    		return 1;
+    	else
+    	{
+    		for(int i = 1; i< biggest; i++)
+    			if(!map.containsKey(i))
+    				return i;
+    	}
+    	
+    	
+    		
+    	return biggest+1;
+
+    }
+    

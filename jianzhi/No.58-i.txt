@@ -1,0 +1,17 @@
+    public String reverseWords(String s) {
+    	
+    	String[] ls = s.split(" ");
+    	StringBuilder res = new StringBuilder();
+    	int len = ls.length;
+    	
+    	for(int i = len - 1; i >= 0; i--) {
+    		if(ls[i].equals(""))
+    			continue; // 删掉中间多余空格
+    		res.append(ls[i]);
+    		res.append(" ");
+    	}
+    	
+    	return res.toString().trim();
+    	
+
+    }

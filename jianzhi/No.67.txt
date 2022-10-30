@@ -1,0 +1,30 @@
+
+    public int strToInt(String str) {
+    	char[] ls = str.trim().toCharArray();
+    	if(ls.length == 0)
+    		return 0;
+    	
+    	int res = 0, bndry = Integer.MAX_VALUE / 10;
+    	
+    	int i = 1;
+    	int sign = 1;
+    	
+    	if(ls[0] == '-')
+    		sign = -1;
+    	else if(ls[0] != '+')
+    		i = 0;
+    	
+    	for(int j = i; j < ls.length; j++) {
+            if(ls[j] < '0' || ls[j] > '9') break;
+            if(res > bndry || res == bndry && ls[j] > '7') return sign == 1 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+            res = res * 10 + (ls[j] - '0'); // - ‘0’ 的 ASII码来实现转换！
+        }
+
+
+    	
+    	
+    	return sign * res;
+    		
+    		
+
+    }

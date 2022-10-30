@@ -1,0 +1,10 @@
+    public int majorityElement(int[] nums) {
+    	
+    	Arrays.parallelSort(nums);
+    	int len = nums.length;
+    	
+    	int index = len/2 + 1;
+    	
+    	return nums[index-1];
+
+    }

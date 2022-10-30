@@ -1,0 +1,27 @@
+    
+    public int[] twoSum(int[] nums, int target) {
+    	
+    	int[] res = new int[2];
+    	int low = 0;
+    	int high = nums.length - 1;
+    	
+    	if(nums.length < 2)
+    		return res;
+    	
+    	while(low < high) {
+    		if(nums[low] + nums[high] == target) {
+    			res[0] = nums[low];
+    			res[1] = nums[high];
+    			return res;
+    		}
+    		else if(nums[low] + nums[high] > target)
+    			high--;
+    		else
+    			low++;
+    	}
+    	
+    	return res;
+    	
+    	
+
+    }

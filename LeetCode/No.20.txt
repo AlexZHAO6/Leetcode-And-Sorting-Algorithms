@@ -1,0 +1,39 @@
+    public boolean isValid(String s) {
+    	int len = s.length();
+    	if(len < 2)
+    		return false;
+    	
+    	Stack<Character> stack = new Stack<>();
+    	if(!(s.charAt(0) == '(' || s.charAt(0) == '[' || s.charAt(0) == '{'))
+    		return false;
+    	else
+    		stack.push(s.charAt(0));
+    	
+    	for(int i = 1; i < len; i++) {
+    		if(s.charAt(i) == '(' || s.charAt(i) == '[' || s.charAt(i) == '{') {
+    			stack.push(s.charAt(i));
+    		}
+    		else if(s.charAt(i) == ')') {
+    			if(!stack.isEmpty() && stack.peek() == '(')
+    				stack.pop();
+    			else
+    				stack.push(s.charAt(i));
+    		}
+    		else if(s.charAt(i) == ']') {
+    			if(!stack.isEmpty()&&stack.peek() == '[')
+    				stack.pop();
+    			else
+    				stack.push(s.charAt(i));
+    		}
+    		else if(s.charAt(i) == '}') {
+    			if(!stack.isEmpty()&&stack.peek() == '{')
+    				stack.pop();
+    			else
+    				stack.push(s.charAt(i));
+    		}
+    	}
+    	
+    	return stack.isEmpty();
+    	
+        
+    }

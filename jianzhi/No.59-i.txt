@@ -1,0 +1,40 @@
+    public int[] maxSlidingWindow(int[] nums, int k) {
+    	
+    	int len = nums.length;
+        if(nums.length==0||k==0||k>nums.length)
+        	return new int[0];
+    	int[] res = new int[len-k+1];
+    	int max = Integer.MIN_VALUE;
+    	int index = -1;
+    	int left = 0;
+    	int right = k - 1;
+    	int count = 0;
+    	while(right < len) {
+    		if(index >= left) {
+    			if(nums[right] >= max) {
+    				max = nums[right];
+    				index = right;
+    			}
+    			
+    		}
+    		else {
+    			max = nums[left];
+    			index = left;
+    			for(int i = left; i <= right; i++) {
+    				if(nums[i] >= max) {
+    					max = nums[i];
+    					index = i;
+    				}
+    			}
+    		}
+    		res[count++] = max;
+    		left++;
+    		right++;
+    		
+    	}
+    	
+    	
+    	
+    	return res;
+
+    }

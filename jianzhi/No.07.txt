@@ -1,0 +1,37 @@
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+    	if(preorder == null || preorder.length == 0)
+    		return null;
+    	
+    	int len = inorder.length;
+    	HashMap<Integer,Integer> map = new HashMap<>();
+    	
+    	for(int i = 0; i < len; i++) {
+    		map.put(inorder[i], i);
+    	}
+    	
+    	TreeNode root = buildTree(preorder,inorder,0,len-1,0,len-1,map);
+    	
+    	return root;
+    	
+    }
+    
+    public TreeNode buildTree(int[] preorder, int[] inorder, int prestart, int preend, int instart, int inend, HashMap<Integer,Integer> map) {
+    	if(prestart > preend)
+    		return null;
+    	
+    	TreeNode root = new TreeNode(preorder[prestart]);
+    	if(prestart == preend)
+    		return root;
+    	else {
+    		int rootIndex = map.get(preorder[prestart]);
+    		int leftnodes = rootIndex - instart;
+    		int rightnodes = inend - rootIndex;
+    		TreeNode left = buildTree(preorder,inorder,prestart+1,prestart+leftnodes,instart,rootIndex-1,map);
+    	    TreeNode right = buildTree(preorder,inorder,preend-rightnodes+1,preend,rootIndex+1,inend,map);
+    	    
+    	    root.left = left;
+    	    root.right = right;
+    	    
+    	    return root;
+    	}
+    } //递归！

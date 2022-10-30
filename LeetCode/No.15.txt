@@ -1,0 +1,48 @@
+    public List<List<Integer>> threeSum(int[] nums) {
+    	int len = nums.length;
+    	Arrays.parallelSort(nums);
+    	List<List<Integer>> res = new ArrayList<>();
+    	
+    	for(int i = 0; i < len; i++) {
+    		if(i > 0 && nums[i] == nums[i-1])
+    			continue;
+    		
+    		int target = nums[i] - 2 * nums[i];
+    		towsum(nums,res,i+1,len-1,target);	
+    	}
+    	
+    	return res;
+    	
+
+    }
+    
+    private void towsum(int[] nums, List<List<Integer>> res, int start, int end, int target) {
+    	int second = start;
+    	int third = end;
+    	while(second < third) {
+    		if(second > start && nums[second] == nums[second-1]) {
+    			second++;
+    			continue;
+    		}
+    		
+    		if(second > third)
+    			return;
+    		List<Integer> tmp = new ArrayList<>();
+    		if(nums[second] + nums[third] == target) {
+    			tmp.add(target-2*target);
+    			tmp.add(nums[second]);
+    			tmp.add(nums[third]);
+    			
+    			res.add(new ArrayList<>(tmp));
+    			second++;
+    			third--;
+    		}
+    		else if(nums[second] + nums[third] < target) {
+    			second++;
+    		}
+    		else
+    			third--;
+    	}
+    	
+    	return;
+    }//three sum 转移成 two sum 双指针+排序

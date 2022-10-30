@@ -1,0 +1,37 @@
+class MaxQueue {
+	
+	Queue<Integer> q;
+	Deque<Integer> d;
+	int max = 0;
+
+    public MaxQueue() {
+    	q = new LinkedList<>();
+    	d = new LinkedList<>();
+    }
+    
+    public int max_value() {
+    	if(!d.isEmpty())
+    		return d.getFirst();
+    	
+    	else
+    		return -1;
+
+    }
+    public void push_back(int value) {
+    	while(!d.isEmpty() && d.getLast() < value)
+    		d.pollLast();
+    	d.addLast(value);
+    	q.add(value);
+    }
+    
+    public int pop_front() {
+    	if(q.isEmpty())
+    		return -1;
+    	int ans = q.poll();
+    	if(d.getFirst() == ans)
+    		d.pollFirst();
+    	
+    	return ans;
+
+    }
+} //双端队列  1 1 1 1 2 则前面的1对max都无影响！

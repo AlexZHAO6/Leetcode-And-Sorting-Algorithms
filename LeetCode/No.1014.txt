@@ -1,0 +1,16 @@
+    public int maxScoreSightseeingPair(int[] A) {
+    	int len = A.length;
+    	int ans = 0;
+    	int max = A[0] + 0;
+    	
+    	if(len < 2)
+    		return 0;
+    	
+    	for(int j = 1; j < len; j++) {
+    		ans = Math.max(ans, max + A[j] - j);
+    		max = Math.max(max, A[j] + j);
+    	}
+    	
+    	return ans;
+
+    } // A[i] + A[j] + i - j = A[i] + i + A[j] - j;

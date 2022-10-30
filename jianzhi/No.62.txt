@@ -1,0 +1,27 @@
+    public int lastRemaining(int n, int m) {
+    	
+    	ArrayList<Integer> arr = new ArrayList<>();
+    	for(int i = 0; i < n; i++) {
+    		arr.add(i);
+    	}
+    	int index = n;
+    	int index2 = m;
+    	for(int j = 1; j < n; j++) {
+        
+        	while(index2 > index) {
+        		index2 = index2 - index;
+        	}
+    	    if(index2 <= index) {
+    	    	arr.remove(index2-1);
+    	    	index--;
+    	    	index2 += m - 1;
+    	    	
+    	    }
+    	
+    	}
+    	
+    	return arr.get(0);
+
+        
+
+    }

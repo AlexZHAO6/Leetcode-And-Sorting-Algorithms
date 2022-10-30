@@ -1,0 +1,17 @@
+    public int maxProfit(int[] prices) {
+    	if(prices.length <= 0)
+    		return 0;
+    	int len = prices.length;
+    	int[] dp = new int[len];
+    	dp[0] = 0;
+    	int cost = prices[0];
+    	for(int i = 1; i < len; i++) {
+    		cost = Math.min(prices[i], cost);
+    		dp[i] = Math.max(dp[i-1], prices[i] - cost);
+    		
+    	}
+    	
+    	return dp[len-1];
+    	
+
+    } //dp！！

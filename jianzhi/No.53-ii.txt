@@ -1,0 +1,19 @@
+    public int missingNumber(int[] nums) {
+    	int len = nums.length;
+    	if(len == 0)
+    		return 0;
+    	
+    	int i = 0;
+    	int j = len -1;
+    	
+    	while(i < j) {
+    		int m = (i + j) / 2;
+    		if(nums[m] == m)
+    			i = m+1;
+    		else
+    			j = m-1;
+    	}
+    	
+    	return i;
+
+    }

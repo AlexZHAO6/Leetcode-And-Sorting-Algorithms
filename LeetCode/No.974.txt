@@ -1,0 +1,18 @@
+    public int subarraysDivByK(int[] A, int K) {
+    	HashMap<Integer,Integer> record = new HashMap<>();
+    	int sum = 0;
+    	int res = 0;
+    	record.put(0, 1);
+    	for(int num : A) {
+    		sum += num;
+    		int module = (sum % K + K) % K;
+    		int same = record.getOrDefault(module, 0);
+    		res += same;
+    		
+    		record.put(module, same+1);
+    	}
+    	
+    	
+    	return res;
+
+    }

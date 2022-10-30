@@ -1,0 +1,23 @@
+    public boolean searchMatrix(int[][] matrix, int target) {
+    	int m = matrix.length;
+    	if(m == 0)
+    		return false;
+    	int n = matrix[0].length;
+    	if(n == 0)
+    		return false;
+    	
+    	int down = m - 1;
+    	int left = 0;
+    	
+    	while(down >= 0 && left < n) {
+    		if(matrix[down][left] == target)
+    			return true;
+    		else if(matrix[down][left] < target)
+    			left++;
+    		else
+    			down--;
+    	}
+    	
+    	return false;
+        
+    }

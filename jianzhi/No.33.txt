@@ -1,0 +1,21 @@
+    public boolean verifyPostorder(int[] postorder) {
+    	int len = postorder.length;
+
+    	
+    	return recur(0, len - 1, postorder);
+
+    }
+    
+    boolean recur(int start, int end, int[] ls) {
+    	if(start >= end)
+    		return true;
+    	
+    	int index = start;
+    	while(ls[index] < ls[end])
+    		index++;
+    	int ro = index;
+    	while(ls[index] > ls[end])
+    		index++;
+    	
+    	return index == end && recur(start,ro-1,ls) && recur(ro,end-1,ls);
+    }

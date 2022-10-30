@@ -1,0 +1,22 @@
+    public int[] exchange(int[] nums) {
+    	int len = nums.length;
+    	int left = 0;
+    	int right = len - 1;
+    	
+    	while(left < right) {
+    		while(nums[left] % 2 == 1 && left < right)
+    			left++;
+    		while(nums[right] % 2 == 0 && left < right)
+    			right--;
+    		
+    		if(left < right) {
+    			int tmp = nums[left];
+    			nums[left] = nums[right];
+    			nums[right] = tmp;
+    		}
+    	}
+    	
+    	
+    	return nums;
+
+    }//双指针

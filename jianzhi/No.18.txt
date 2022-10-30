@@ -1,0 +1,22 @@
+    public ListNode deleteNode(ListNode head, int val) {
+    	
+    	if(head.val == val)
+    		return head.next;
+    	
+    	ListNode tmp = head;
+    	ListNode pre = null;
+    	while(tmp.val != val)
+    	{
+    		pre = tmp;
+    		tmp = tmp.next;
+    	}
+    	
+    	
+    	pre.next = tmp.next;
+    	
+    	return head;
+    		
+    	
+    	
+
+    }

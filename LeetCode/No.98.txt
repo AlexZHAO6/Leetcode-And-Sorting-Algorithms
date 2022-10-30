@@ -1,0 +1,47 @@
+    public boolean isValidBST(TreeNode root) {
+    	if(root == null)
+    		return true;
+    	
+    	if(root.left == null && root.right == null)
+    		return true;
+    	
+    	if(root.left != null) {
+    		if(isValidBST(root.left) == true) {
+        		if(root.val <= getlargest(root.left).val)
+        			return false;
+    		}
+    		else
+    			return false;
+    	}
+    	
+    	if(root.right != null) {
+    		if(isValidBST(root.right) == true) {
+        		if(root.val >= getleast(root.right).val)
+        			return false;
+    		}
+
+    		else
+    			return false;
+    	}
+    	
+    	
+		return true;
+    	
+        
+
+    }
+    
+    public TreeNode getleast(TreeNode node) {
+    	while(node.left != null)
+    		node = node.left;
+    	
+    	return node;
+    		
+    }
+    
+    public TreeNode getlargest(TreeNode node) {
+    	while(node.right != null)
+    		node = node.right;
+    	
+    	return node;
+    }

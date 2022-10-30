@@ -1,0 +1,15 @@
+    public String reverseLeftWords(String s, int n) {
+    	StringBuilder res = new StringBuilder();
+    	
+    	if(s.length() == 0 || n == 0 || n >= s.length())
+    		return s;
+    	
+    	String tmp = s.substring(0, n);
+    	String tmp2 = s.substring(n);
+    	
+    	res.append(tmp2);
+    	res.append(tmp);
+    	
+    	return res.toString();
+
+    }

@@ -1,0 +1,30 @@
+    
+    public int movingCount(int m, int n, int k) {
+    	if(k < 0 || m < 0 || n < 0)
+    		return 0;
+    	boolean[][] visited = new boolean[m][n];
+    	return depthfirst(0,0,k,m,n,visited);
+    	
+
+    }
+    
+    public int depthfirst(int i, int j, int k, int m,int n,boolean[][] visited) {
+    	if(i >= m || i < 0 || j >= n || j < 0 || getsum(i) + getsum(j) > k || visited[i][j] == true)
+    		return 0;
+    	
+    	visited[i][j] = true;
+		return 1 + depthfirst(i - 1, j, k, m, n,visited) + depthfirst(i+1,j,k,m,n,visited) + depthfirst(i,j-1,k,m,n,visited) 
+		+ depthfirst(i,j+1,k,m,n,visited);
+    }
+    
+    public int getsum(int n) {
+    	int sum = 0;
+    	while(n > 0) {
+    		sum += n % 10;
+    		n /= 10;
+    	}
+    	
+    	return sum;
+    }
+
+//递归实现深度优先搜索

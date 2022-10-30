@@ -22,6 +22,7 @@ public class LeetcodeAlgorithms {
 class leetcode{
     private final static Random random = new Random();
     private int treenode_ans;
+    private TreeNode ans = null;
 
 
     Map<Node,Node> cachemap = new HashMap<>();
@@ -4063,6 +4064,262 @@ class leetcode{
         list.add(root);
         inorderTra(root.left, list);
         inorderTra(root.right, list);
+    }
+
+
+    //Recursion!!
+    // 定义F(x) 表示 x 节点的子树中是否包含 p 节点或 q 节点，如果包含为 true，否则为 false。
+    // 代码中lson和rson就是F(x)
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        commonAncestor_help(root, p, q);
+
+        return this.ans;
+    }
+    public boolean commonAncestor_help(TreeNode root, TreeNode p, TreeNode q){
+        if(root == null) return false;
+
+        boolean lson = commonAncestor_help(root.left, p, q);
+        boolean rson = commonAncestor_help(root.right, p, q);
+
+        if((lson && rson) || (root.val == p.val || root.val == q.val) &&(lson || rson)){
+            ans = root;
+        }
+
+        return lson || rson || root.val == p.val || root.val == q.val;
+    }
+
+    //利用搜索树性质找到P、Q节点并记录路径，路径上最后一个公共节点就是最近公共祖先！！
+    public TreeNode lowestCommonAncestor2(TreeNode root, TreeNode p, TreeNode q) {
+        List<TreeNode> pathp = getPath(root, p);
+        List<TreeNode> pathq = getPath(root, q);
+
+        TreeNode res = null;
+        int len = Math.min(pathp.size(), pathq.size());
+        for(int i = 0; i < len; i++){
+            if(pathp.get(i) == pathq.get(i)) res = pathp.get(i);
+            else break;
+        }
+        return res;
+    }
+    public List<TreeNode> getPath(TreeNode root, TreeNode node){
+        List<TreeNode> res = new LinkedList<>();
+        while(root != node){
+            res.add(root);
+            if(root.val < node.val) root = root.right;
+            else if(root.val > node.val) root = root.left;
+        }
+
+        res.add(root);
+        return res;
+    }
+
+    //利用搜索树中序遍历递增的性质，找到错误的两个节点，然后将节点的值互换！;
+    //搜索树不存在重复值;
+    public void recoverTree(TreeNode root) {
+        List<Integer> nums = new ArrayList<Integer>();
+        inorder(root, nums);
+        int[] swapped = findTwoSwapped(nums);
+        recover(root, 2, swapped[0], swapped[1]);
+    }
+    public void inorder(TreeNode root, List<Integer> nums) {
+        if (root == null) {
+            return;
+        }
+        inorder(root.left, nums);
+        nums.add(root.val);
+        inorder(root.right, nums);
+    }
+    public int[] findTwoSwapped(List<Integer> nums) {
+        int n = nums.size();
+        int index1 = -1, index2 = -1;
+        for (int i = 0; i < n - 1; ++i) {
+            if (nums.get(i + 1) < nums.get(i)) {
+                index2 = i + 1;
+                if (index1 == -1) {
+                    index1 = i;
+                } else {
+                    break;
+                }
+            }
+        }
+        int x = nums.get(index1), y = nums.get(index2);
+        return new int[]{x, y};
+    }
+    public void recover(TreeNode root, int count, int x, int y) {
+        if (root != null) {
+            if (root.val == x || root.val == y) {
+                root.val = root.val == x ? y : x;
+                if (--count == 0) {
+                    return;
+                }
+            }
+            recover(root.right, count, x, y);
+            recover(root.left, count, x, y);
+        }
+    }
+
+
+    //DFS深搜，遍历数组，从 i 向nums[i] 连边，我们可以得到一张有向图。
+    //记录visited，由于图必然有环，前一次访问过的节点不用再次访问因为长度必然小于前一次！
+    public int arrayNesting(int[] nums) {
+        int res = 0;
+        int len = nums.length;
+        boolean[] visited = new boolean[len];
+        for(int i = 0; i < len; i++){
+            int count = 0;
+            while(!visited[i]){
+                visited[i] = true;
+                count++;
+                i = nums[i];
+            }
+
+            res = Math.max(res, count);
+        }
+
+        return res;
+    }
+
+    //回溯算法用于寻找所有的可行解，如果发现一个解不可行，则会舍弃不可行的解。(回溯基于递归实现)
+    //在这道题中，由于每个数字对应的每个字母都可能进入字母组合，因此不存在不可行的解，直接穷举所有的解即可。
+    public List<String> letterCombinations(String digits) {
+        List<String> combinations = new ArrayList<String>();
+        if (digits.length() == 0) {
+            return combinations;
+        }
+        Map<Character, String> phoneMap = new HashMap<Character, String>() {{
+            put('2', "abc");
+            put('3', "def");
+            put('4', "ghi");
+            put('5', "jkl");
+            put('6', "mno");
+            put('7', "pqrs");
+            put('8', "tuv");
+            put('9', "wxyz");
+        }};
+        backtrack(combinations, phoneMap, digits, 0, new StringBuffer());
+        return combinations;
+    }
+    public void backtrack(List<String> combinations,Map<Character, String> phoneMap
+            ,String digits, int index, StringBuffer combination){
+        if(index == digits.length()){
+            combinations.add(combination.toString());
+        }
+        else {
+            char digit = digits.charAt(index);
+            String letters = phoneMap.get(digit);
+            int lettersCount = letters.length();
+            for (int i = 0; i < lettersCount; i++) {
+                combination.append(letters.charAt(i));
+                backtrack(combinations, phoneMap, digits, index + 1, combination);
+                combination.deleteCharAt(index);
+            }
+        }
+    }
+
+
+    //回溯 + 剪枝，当长度不足够到达k时 直接返回;
+    public List<List<Integer>> combine(int n, int k) {
+        List<List<Integer>> res = new LinkedList<>();
+        List<Integer> tmplist = new LinkedList<>();
+
+        combine_help(res, tmplist, 1, n, k);
+        return res;
+    }
+    public void combine_help(List<List<Integer>> res, List<Integer> tmplist, int begin, int n, int k){
+        if(tmplist.size() == k){
+            res.add(new LinkedList<>(tmplist));
+            return;
+        }
+
+        if(n - begin + 1 + tmplist.size() < k) return;
+
+        for(int i = begin; i <= n; i++){
+            tmplist.add(i);
+            combine_help(res, tmplist, i+1, n, k);
+            tmplist.remove(tmplist.size()-1);
+        }
+    }
+
+    //由于数字是1 - 9 所以可以使用数组代替哈希表，遍历统计 行 列 3*3格子;
+    public boolean isValidSudoku(char[][] board) {
+        int[][] rows = new int[9][9];
+        int[][] columns = new int[9][9];
+        int[][][] subboxes = new int[3][3][9];
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                char c = board[i][j];
+                if (c != '.') {
+                    int index = c - '0' - 1;
+                    rows[i][index]++;
+                    columns[j][index]++;
+                    //用二维数组代表小方格; 用i/3 j/3标识;
+                    subboxes[i / 3][j / 3][index]++;
+                    if (rows[i][index] > 1 || columns[j][index] > 1 || subboxes[i / 3][j / 3][index] > 1) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+
+    //回溯+剪枝！！
+    public List<List<Integer>> combinationSum(int[] candidates, int target) {
+        List<List<Integer>> res = new LinkedList<>();
+        List<Integer> tmplist = new LinkedList<>();
+        int len = candidates.length;
+        Arrays.sort(candidates);
+        combinationSum_help(0,len, candidates, target, tmplist, res);
+        return res;
+    }
+    public void combinationSum_help(int begin, int len, int[] candidates, int target, List<Integer> tmplist, List<List<Integer>> res){
+        if(target < 0){
+            return;
+        }
+        if(target == 0){
+            res.add(new LinkedList<>(tmplist));
+            return;
+        }
+
+        for(int i = begin; i < len; i++){
+            if(target - candidates[i] < 0) break;
+            tmplist.add(candidates[i]);
+            combinationSum_help(i,len, candidates, target-candidates[i],tmplist,res);
+            tmplist.remove(tmplist.size()-1);
+        }
+    }
+
+
+    //回溯法遍历，用visited数组避免遍历已遍历过的元素！;
+    //也可以不用visited数组，将遍历过的元素放在左边，未遍历的放在右边，回溯的时候只遍历右边元素;
+    public List<List<Integer>> permute(int[] nums) {
+        List<List<Integer>> res = new LinkedList<>();
+        List<Integer> tmplist = new LinkedList<>();
+
+        int len = nums.length;
+        if(len == 0) return res;
+        boolean[] visited = new boolean[len];
+
+        permute_help(0,len,visited,tmplist,res,nums);
+        return res;
+    }
+    public void permute_help(int index, int len, boolean[] visited, List<Integer> tmplist, List<List<Integer>> res, int[] nums){
+        if(index == len){
+            res.add(new LinkedList<>(tmplist));
+            return;
+        }
+
+        for(int i = 0; i < len; i++){
+            if(!visited[i]){
+                tmplist.add(nums[i]);
+                visited[i] = true;
+                permute_help(index+1,len,visited,tmplist,res,nums);
+                tmplist.remove(tmplist.size()-1);
+                visited[i] = false;
+            }
+        }
     }
 
 

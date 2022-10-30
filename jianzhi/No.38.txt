@@ -1,0 +1,58 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Scanner;
+import java.util.Stack;
+public class Main {
+
+    public static void main(String[] args) {
+    	System.out.println("algorithms");
+    }
+    
+    public String[] permutation(String s) {
+		ArrayList<String> res = new ArrayList<>();
+		String[] result = null;
+    	if(s.length() > 0 && s != null) {
+    		helpPermutation(s.toCharArray(),0,res);
+        	result = new String[res.size()];
+        	for(int i = 0; i < res.size(); i++) {
+        		result[i] = res.get(i);
+        	}
+        	
+        	
+    	}
+    	  	
+   
+    	return result;
+
+    }
+    
+    public void helpPermutation(char[] ls, int i, ArrayList<String> lst) {
+    	if(i == ls.length -1) {
+    		String tp = String.valueOf(ls);
+    		if(!lst.contains(tp))
+    			lst.add(tp);
+    	}
+    	else {
+    		for(int j = i; j < ls.length; j++) {
+    			swap(i,j,ls);
+    			helpPermutation(ls,i+1,lst);
+    			swap(i,j,ls);
+    		}
+    	}
+    }
+    
+    public void swap(int i, int j, char[] ls) {
+    	char tmp = ls[i];
+    	ls[i] = ls[j];
+    	ls[j] = tmp;
+    }
+    
+    
+    
+
+
+
+}
+
+

@@ -1,0 +1,52 @@
+    public ListNode mergeKLists(ListNode[] lists) {
+    	int len = lists.length;
+    	
+    	if(len == 0)
+    		return null;
+    	
+    	return helper(lists,0,len-1);    	
+     }
+    
+    private ListNode helper(ListNode[] lists, int left, int right) {
+    	if(left == right)
+    		return lists[left];
+    	
+    	int mid = (left + right) / 2;
+    	
+    	ListNode l1 = helper(lists,left,mid);
+    	ListNode l2 = helper(lists,mid+1,right);
+    	
+    	return merge(l1,l2);	
+    }
+    
+    private ListNode merge(ListNode l1, ListNode l2) {
+    	ListNode dummy = new ListNode(-1);
+    	ListNode tmp = dummy;
+    	
+    	while(l1 != null && l2 != null) {
+    		if(l1.val >= l2.val) {
+    			tmp.next = l2;
+    			l2 = l2.next;
+    			tmp = tmp.next;
+    		}
+    		else {
+    			tmp.next = l1;
+    			l1 = l1.next;
+    			tmp = tmp.next;
+    		}
+    	}
+    	
+    	while(l1 != null) {
+    		tmp.next = l1;
+    		l1 = l1.next;
+    		tmp = tmp.next;
+    	}
+    	
+    	while(l2 != null) {
+    		tmp.next = l2;
+    		l2 = l2.next;
+    		tmp = tmp.next;
+    	}
+    	
+    	return dummy.next;
+    } // 分治思想，两两合并

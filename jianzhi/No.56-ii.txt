@@ -1,0 +1,15 @@
+    public int singleNumber(int[] nums) {
+    	HashMap<Integer, Integer> tmp = new HashMap<>();
+    	
+    	for(int i = 0 ; i < nums.length; i++) {
+    		tmp.put(nums[i], tmp.getOrDefault(nums[i], 0) + 1);
+    	}
+    	
+    	for(int j : tmp.keySet()) {
+    		if(tmp.get(j) == 1)
+    			return j;
+    	}
+    	
+    	return -1;
+    	
+    } //hashmap 解决！

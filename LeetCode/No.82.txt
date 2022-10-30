@@ -1,0 +1,30 @@
+    
+    public ListNode deleteDuplicates(ListNode head) {
+    	ListNode dummy = new ListNode(-1);
+    	dummy.next = head;
+    	
+    	ListNode left = dummy;
+    	ListNode right = head;
+    	
+    	while(right != null && right.next != null) {
+    		if(left.next.val != right.next.val) {
+    			left = left.next;
+    			right = right.next;
+    		}
+    		else {
+        		
+        		while(right != null && right.next != null && left.next.val == right.next.val) {
+        			right = right.next;
+        		}
+        		
+        		left.next = right.next;
+        		right = right.next;
+    		}
+
+    		 
+    	}
+    	
+    	return dummy.next;
+
+    } //双指针法
+    

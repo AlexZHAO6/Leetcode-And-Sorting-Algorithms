@@ -1,0 +1,44 @@
+    public int findKthLargest(int[] nums, int k) {
+    	int len = nums.length;
+    	int lo = 0;
+    	int hi = len-1;
+    	
+    	return quicksort(nums,k,lo,hi);
+    }
+    
+    private int quicksort(int[] nums, int k, int lo, int hi) {
+    	int index = partition(nums,lo,hi);
+    	if(index == nums.length - k)
+    		return nums[index];
+    	else if(index > nums.length - k)
+    		return quicksort(nums,k,lo, index-1);
+    	else
+    		return quicksort(nums,k,index+1, hi);
+    	
+    }
+    
+    private int partition(int[] nums, int lo, int hi) {
+    	int i = lo;
+    	int j = hi;
+    	int x = nums[i];
+    	
+    	while(i < j) {
+    		while(i < j && nums[j] > x)
+    			j--;
+    		if(i < j) {
+    			nums[i] = nums[j];
+    			i++;
+    		}
+    		while(i < j && nums[i] < x)
+    			i++;
+    		if(i < j) {
+    			nums[j] = nums[i];
+    			j--;
+    		}
+    			
+    	}
+    	
+    	nums[i] = x;
+    	return i;
+    	  	
+    }

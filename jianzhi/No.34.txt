@@ -1,0 +1,67 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Stack;
+public class Main {
+	List<List<Integer>> res = new ArrayList<>();
+	LinkedList<Integer> ls = new LinkedList<>();
+    public static void main(String[] args) {
+    	System.out.println("algorithms");
+    }
+    
+    
+    public List<List<Integer>> pathSum(TreeNode root, int sum) {
+
+    	if(root == null)
+    		return res;
+    	
+    	paths(root,sum);
+    	
+    	return res;
+    }
+    
+    public void paths(TreeNode root, int sum){
+    	
+    	sum -= root.val;
+    	ls.add(root.val);
+    	if(sum == 0 && root.left == null && root.right == null) {
+    		res.add(new ArrayList(ls)); //值得注意的是，记录路径时若直接执行 res.append(path) ，则是将 path 对象加入了 res ；后续 path 改变                                            //时， res 中的 path 对象也会随之改变。
+
+
+    	}
+    	if(root.left != null) {
+        	paths(root.left,sum);
+    	}
+
+    	if(root.right != null) {
+        	paths(root.right,sum);
+    	}
+    	
+    	ls.removeLast();
+
+    	
+    	
+    }
+    
+
+
+}
+
+class ListNode {
+     int val;
+     ListNode next;
+     ListNode(int x) { val = x; }
+ }
+class TreeNode {
+   int val;
+     TreeNode left;
+     TreeNode right;
+     TreeNode(int x) { val = x; }
+ }
+
+
+
+

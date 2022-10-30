@@ -1,0 +1,21 @@
+    public List<Integer> findDisappearedNumbers(int[] nums) {
+    	int len = nums.length;
+    	List<Integer> res = new LinkedList<>();
+    	if(len == 0)
+    		return res;
+    	
+    	for(int i = 0; i < len; i++) {
+    		int newIndex = Math.abs(nums[i]) - 1;
+    		
+    		if(nums[newIndex] > 0)
+    			nums[newIndex] *= -1;
+    	}
+    	
+    	for(int i = 0; i < len; i++) {
+    		if(nums[i] > 0)
+    			res.add(i+1);
+    	}
+    	
+    	return res;
+
+    }// 原地修改数组 利用索引！

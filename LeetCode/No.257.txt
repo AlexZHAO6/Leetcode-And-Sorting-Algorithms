@@ -1,0 +1,30 @@
+    public List<String> binaryTreePaths(TreeNode root) {
+    	
+    	List<String> res = new LinkedList<>();
+    	if(root == null)
+    		return res;
+    	
+    	String path = "";
+    	recur(root,res,path);
+    	
+    	return res;
+    	
+    	
+
+    }
+    
+    public void recur(TreeNode node, List<String> res, String path){
+    	if(node != null)
+    		path += Integer.toString(node.val);
+    	else
+    		return;
+    	
+    	if(node.left == null && node.right == null)
+    		res.add(path);
+    	else {
+    		path += "->";
+    		recur(node.left,res,path);
+    		recur(node.right,res,path);
+    	}
+    	
+    }

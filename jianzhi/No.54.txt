@@ -1,0 +1,20 @@
+    public int kthLargest(TreeNode root, int k) {
+    	ArrayList<Integer> ls = new ArrayList<>();
+    	
+    	if(root == null)
+    		return ls.get(0);
+    	
+    	inorder(root,ls);
+    	
+    	
+    	return ls.get(ls.size()-k);
+
+    }
+    
+    public void inorder(TreeNode node, ArrayList<Integer> ls) {
+    	if(node == null)
+    		return;
+    	inorder(node.left,ls);
+    	ls.add(node.val);
+    	inorder(node.right,ls);
+    }

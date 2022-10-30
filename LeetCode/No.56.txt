@@ -1,0 +1,30 @@
+    public int[][] merge(int[][] intervals) {
+    	ArrayList<int[]> res = new ArrayList<>();
+    	if(intervals.length <= 1)
+    		return intervals;
+    	Arrays.sort(intervals, new Comparator<int[]>(){
+			@Override
+			public int compare(int[] o1, int[] o2) {
+				// TODO Auto-generated method stub
+				return o1[0] - o2[0];
+			}
+    		
+    	});
+    	
+    	
+    	for(int i = 0; i < intervals.length - 1; i++) {
+    		if(intervals[i][1] >= intervals[i+1][0]) {
+    			intervals[i+1][0] = intervals[i][0];
+    			intervals[i+1][1] = Math.max(intervals[i][1],intervals[i+1][1]);
+    		}
+    		else
+    			res.add(intervals[i]);
+    	}
+    	
+    	res.add(intervals[intervals.length-1]);
+    	
+    	
+    		
+    	return res.toArray(new int[res.size()][2]);
+
+    }//按第一个节点排序 然后合并

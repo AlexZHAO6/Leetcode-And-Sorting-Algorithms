@@ -1,0 +1,25 @@
+    public boolean isCompleteTree(TreeNode root) {
+    	List<HelpNode> ls = new ArrayList<>();
+    	ls.add(new HelpNode(root,1));
+    	int i = 0;
+    	while(i < ls.size()) {
+    		HelpNode node = ls.get(i++);
+    		if(node.node != null) {
+    			ls.add(new HelpNode(node.node.left, node.num * 2));
+    			ls.add(new HelpNode(node.node.right, node.num * 2 + 1));
+    		}
+    	}
+    	
+    	return ls.get(ls.size()-1).num == ls.size();
+    	
+
+    }
+    
+class HelpNode{
+	TreeNode node;
+	int num;
+	public HelpNode(TreeNode node, int num) {
+		this.node = node;
+		this.num = num;
+	}
+}
