@@ -3,19 +3,7 @@ import java.util.*;
 public class LeetcodeAlgorithms {
 
     public static void main(String[] args){
-        int[] test_global = {1,5,3,2,7};
-        SortAlgorithms_real ah = new SortAlgorithms_real();
         leetcode testclass = new leetcode();
-        int[] test2 = {4,3,2,7,8,2,3,1};
-        List<Integer> reslut = testclass.findDisappearedNumbers(test2);
-
-        String num1 = "123";
-        String num2 = "456";
-        String[] tmp = {"4","13","5","/","*"};
-        testclass.evalRPN(tmp);
-        testclass.decodeString("3[z]2[2[y]pq4[2[jk]e1[f]]]ef");
-        testclass.removeDuplicateLetters("bcabc");
-        System.out.println(testclass.multiply(num1,num2));
     }
 }
 
@@ -4322,7 +4310,129 @@ class leetcode{
         }
     }
 
+    public List<List<Integer>> permuteUnique(int[] nums) {
+        List<List<Integer>> res = new LinkedList<>();
+        List<Integer> tmplist = new LinkedList<>();
+        Arrays.sort(nums);
 
+        int len = nums.length;
+        if(len == 0) return res;
+        boolean[] visited = new boolean[len];
+
+        permuteUnique_help(0,len,visited,tmplist,res,nums);
+        return res;
+    }
+    public void permuteUnique_help(int index, int len, boolean[] visited, List<Integer> tmplist, List<List<Integer>> res, int[] nums){
+        if(index == len){
+            res.add(new LinkedList<>(tmplist));
+            return;
+        }
+
+        for(int i = 0; i < len; i++){
+            if(!visited[i]){
+                //加上 !vis[i - 1]来去重主要是通过限制一下两个相邻的重复数字的访问顺序
+                //举个栗子，对于两个相同的数11，我们将其命名为1a1b, 1a表示第一个1，1b表示第二个1； 那么，不做去重的话，会有两种重复排列 1a1b, 1b1a，
+                //我们只需要取其中任意一种排列； 为了达到这个目的，限制一下1a, 1b访问顺序即可。
+                //比如我们只取1a1b那个排列的话，只有当visit nums[i-1]之后我们才去visit nums[i]， 也就是如果!visited[i-1]的话则continue
+                if(i > 0 && nums[i] == nums[i-1] &&!visited[i-1]) continue;
+                tmplist.add(nums[i]);
+                visited[i] = true;
+                permuteUnique_help(index+1,len,visited,tmplist,res,nums);
+                tmplist.remove(tmplist.size()-1);
+                visited[i] = false;
+            }
+        }
+    }
+
+    //1. 从尾到头遍历找到第一个不为升序的元素i;
+    //2. 从尾到头找到第一个>i的元素j(此时必是最小的>i的元素因为元素i之后的元素都是降序)
+    //3. swap i j;
+    //4. 将i+1到j的元素reverse
+    //根据上面步骤就可以构建出下一个字典序的更大数字;
+    public void nextPermutation(int[] nums) {
+        int i = nums.length - 2;
+        while (i >= 0 && nums[i] >= nums[i + 1]) {
+            i--;
+        }
+        if (i >= 0) {
+            int j = nums.length - 1;
+            while (j >= 0 && nums[i] >= nums[j]) {
+                j--;
+            }
+            nextPermutation_swap(nums, i, j);
+        }
+        nextPermutation_reverse(nums, i + 1);
+    }
+
+    public void nextPermutation_swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
+    }
+
+    public void nextPermutation_reverse(int[] nums, int start) {
+        int left = start, right = nums.length - 1;
+        while (left < right) {
+            nextPermutation_swap(nums, left, right);
+            left++;
+            right--;
+        }
+    }
+
+    //回溯
+    public List<List<Integer>> subsets(int[] nums) {
+        List<List<Integer>> res = new LinkedList<>();
+        List<Integer> tmp = new LinkedList<>();
+        res.add(new LinkedList<>());
+
+        subsets_help(0, nums, res, tmp);
+        return res;
+    }
+    public void subsets_help(int index, int[] nums, List<List<Integer>> res, List<Integer> tmp){
+        if(tmp.size() > 0){
+            res.add(new LinkedList<>(tmp));
+        }
+
+        for(int i = index; i < nums.length; i++){
+            tmp.add(nums[i]);
+            subsets_help(i+1, nums, res, tmp);
+            tmp.remove(tmp.size()-1);
+        }
+    }
+
+
+    //回溯 + hashset去重
+    public List<List<Integer>> findSubsequences(int[] nums) {
+        List<List<Integer>> res = new LinkedList<>();
+        List<Integer> tmp = new LinkedList<>();
+        Set<List<Integer>> visited = new HashSet<>();
+
+        finSubsequences_help(0, nums, res, tmp, visited);
+        return res;
+    }
+    public void finSubsequences_help(int index, int[] nums, List<List<Integer>> res, List<Integer> tmp, Set<List<Integer>> visited){
+        if(tmp.size() > 1){
+            if(!visited.contains(tmp)){
+                visited.add(new LinkedList<>(tmp));
+                res.add(new LinkedList<>(tmp));
+            }
+        }
+
+        for(int i = index; i < nums.length; i++){
+            if(tmp.size() == 0) {
+                tmp.add(nums[i]);
+            }
+            else {
+                if(nums[i] >= tmp.get(tmp.size()-1)){
+                    tmp.add(nums[i]);
+                }
+                else continue;
+            }
+
+            finSubsequences_help(i+1, nums, res, tmp, visited);
+            tmp.remove(tmp.size()-1);
+        }
+    }
 
 }
 
