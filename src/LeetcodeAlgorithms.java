@@ -4434,6 +4434,130 @@ class leetcode{
         }
     }
 
+
+    //回溯，注意回溯后将visited重置！！！！！
+    public boolean exist(char[][] board, String word) {
+        boolean[][] visited = new boolean[board.length][board[0].length];
+        for(int i = 0; i < board.length; i++){
+            for(int j = 0; j < board[0].length; j++){
+                if(exist_help(i, j, board, word, 0, visited)) return true;
+            }
+        }
+
+        return false;
+    }
+    public boolean exist_help(int row, int col, char[][] board, String word, int index, boolean[][] visited){
+        if(row < 0 || col < 0 || row >= board.length || col >= board[0].length) return false;
+        if(visited[row][col]) return false;
+        else {
+            visited[row][col] = true;
+            if(board[row][col] != word.charAt(index)) {
+                visited[row][col] = false;
+                return false;
+            }
+            if(index == word.length() - 1) return true;
+
+            boolean tmp1 = exist_help(row+1,col,board,word,index+1,visited);
+            boolean tmp2 = exist_help(row-1,col,board,word,index+1,visited);
+            boolean tmp3 = exist_help(row,col+1,board,word,index+1,visited);
+            boolean tmp4 = exist_help(row,col-1,board,word,index+1,visited);
+            visited[row][col] = false;
+
+            return tmp1||tmp2||tmp3||tmp4;
+        }
+
+    }
+
+
+    //回溯法，当‘(’ < n 是可以加入之; 当’）‘数量<'（'数量时，可以加入之;
+    //从而避免暴力构造再判断
+     public List<String> generateParenthesis(int n) {
+        List<String> ans = new ArrayList<String>();
+        generateParenthesis_help(ans, new StringBuilder(), 0, 0, n);
+        return ans;
+    }
+    public void generateParenthesis_help(List<String> ans, StringBuilder cur, int open, int close, int max) {
+        if (cur.length() == max * 2) {
+            ans.add(cur.toString());
+            return;
+        }
+        if (open < max) {
+            cur.append('(');
+            generateParenthesis_help(ans, cur, open + 1, close, max);
+            cur.deleteCharAt(cur.length() - 1);
+        }
+        if (close < open) {
+            cur.append(')');
+            generateParenthesis_help(ans, cur, open, close + 1, max);
+            cur.deleteCharAt(cur.length() - 1);
+        }
+    }
+
+
+    public int numIslands(char[][] grid) {
+        int res = 0;
+        int rows = grid.length;
+        int cols = grid[0].length;
+        boolean[][] visited = new boolean[rows][cols];
+
+        for(int i = 0; i < rows; i++){
+            for(int j = 0; j < cols; j++){
+                if(!visited[i][j] && grid[i][j] == '1'){
+                    res++;
+                    numIslands_help(visited, i, j, grid);
+                }
+            }
+        }
+        return res;
+    }
+    public void numIslands_help(boolean[][] visited, int row, int col, char[][] grid){
+        if(row < 0 || col < 0 || row >= grid.length || col >= grid[0].length) return;
+
+        if(grid[row][col] == '0') return;
+
+        if(visited[row][col]) return;
+
+        visited[row][col] = true;
+        numIslands_help(visited, row+1,col,grid);
+        numIslands_help(visited, row-1,col,grid);
+        numIslands_help(visited, row,col+1,grid);
+        numIslands_help(visited, row,col-1,grid);
+    }
+
+
+    //回溯 这题本质上是个分治，其实就是大问题划分为左右两个子问题，然后不断通过递归的方式去求解
+    //根据op(运算符)将式子分为两部分，这两部分又可以继续分所以要递归求解;
+    //分出来的两部分都是List,list包含了该部分所有可能的运算结果；然后将两部分拼起来就是最终答案.
+    public List<Integer> diffWaysToCompute(String expression) {
+        char[] cs = expression.toCharArray();
+
+        return diffWaysToCompute_help(0, cs.length-1, cs);
+    }
+    public List<Integer> diffWaysToCompute_help(int left, int right, char[] cs){
+        List<Integer> res = new LinkedList<>();
+        for(int i = left; i <= right; i++){
+            if(cs[i] >= '0' && cs[i] <= '9') continue;
+
+            List<Integer> l1 = diffWaysToCompute_help(left, i-1, cs);
+            List<Integer> l2 = diffWaysToCompute_help(i+1,right,cs);
+            for(int a : l1){
+                for(int b : l2){
+                    if(cs[i] == '+') res.add(a+b);
+                    else if(cs[i] == '-') res.add(a-b);
+                    else res.add(a*b);
+                }
+            }
+        }
+        if(res.isEmpty()){
+            int cur = 0;
+            for (int i = left; i <= right; i++) cur = cur * 10 + (cs[i] - '0');
+            res.add(cur);
+        }
+
+
+        return res;
+    }
+
 }
 
 // Definition for a Node with random point.
