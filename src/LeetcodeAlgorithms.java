@@ -4548,6 +4548,8 @@ class leetcode{
                 }
             }
         }
+
+        //递归出口，当式子只剩下数字了 就直接把数字加进res然后返回;
         if(res.isEmpty()){
             int cur = 0;
             for (int i = left; i <= right; i++) cur = cur * 10 + (cs[i] - '0');
