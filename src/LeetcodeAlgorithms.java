@@ -11,6 +11,7 @@ class leetcode{
     private final static Random random = new Random();
     private int treenode_ans;
     private TreeNode ans = null;
+    private static int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
 
     Map<Node,Node> cachemap = new HashMap<>();
@@ -4559,6 +4560,165 @@ class leetcode{
 
         return res;
     }
+
+
+    //回溯算法 利用visited[][]记录已访问节点
+    public int maxAreaOfIsland(int[][] grid) {
+        int res = 0;
+        int rows = grid.length;
+        int cols = grid[0].length;
+        boolean[][] visited = new boolean[rows][cols];
+
+        for(int i = 0; i < rows; i++){
+            for(int j = 0; j < cols; j++){
+                if(!visited[i][j] && grid[i][j] == 1){
+                    res = Math.max(res, maxAreaOfIsland_help(visited, i, j, grid));
+                }
+            }
+        }
+        return res;
+    }
+    public int maxAreaOfIsland_help(boolean[][] visited, int row, int col, int[][] grid){
+        int ans = 0;
+        if(row < 0 || col < 0 || row >= grid.length || col >= grid[0].length) return ans;
+
+        if(grid[row][col] == 0) return ans;
+
+        if(visited[row][col]) return ans;
+
+        visited[row][col] = true;
+        ans++;
+        int tmp1 = maxAreaOfIsland_help(visited, row+1,col,grid);
+        int tmp2 = maxAreaOfIsland_help(visited, row-1,col,grid);
+        int tmp3 = maxAreaOfIsland_help(visited, row,col+1,grid);
+        int tmp4 = maxAreaOfIsland_help(visited, row,col-1,grid);
+        return ans + tmp1 + tmp2 + tmp3 + tmp4;
+    }
+
+
+    //广度优先遍历，将所有的0加入队列，将其看作一个整体，然后进行广度优先遍历, 遍历一轮值加1;
+    //也可以这样理解，有一个超级0连接了所有的0，那么1到最近的0的距离就是到超级0的距离 - 1;
+    //我们需要对于每一个 11 找到离它最近的 0。如果只有一个 0 的话，我们从这个 0 开始广度优先搜索就可以完成任务了；
+    //
+    //但在实际的题目中，我们会有不止一个 0。
+    // 我们会想，要是我们可以把这些 0 看成一个整体好了。
+    // 有了这样的想法，我们可以添加一个「超级零」，它与矩阵中所有的 0相连，这样的话，任意一个 1到它最近的 0的距离，会等于这个 1到「超级零」的距离减去一。
+
+    public int[][] updateMatrix(int[][] matrix) {
+        int m = matrix.length, n = matrix[0].length;
+        int[][] dist = new int[m][n];
+        boolean[][] seen = new boolean[m][n];
+        Queue<int[]> queue = new LinkedList<int[]>();
+        // 将所有的 0 添加进初始队列中
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (matrix[i][j] == 0) {
+                    queue.offer(new int[]{i, j});
+                    seen[i][j] = true;
+                }
+            }
+        }
+
+        // 广度优先搜索
+        while (!queue.isEmpty()) {
+            int[] cell = queue.poll();
+            int i = cell[0], j = cell[1];
+            for (int d = 0; d < 4; ++d) {
+                //dirs是二维数组，记录上下左右四个方向
+                int ni = i + dirs[d][0];
+                int nj = j + dirs[d][1];
+                if (ni >= 0 && ni < m && nj >= 0 && nj < n && !seen[ni][nj]) {
+                    dist[ni][nj] = dist[i][j] + 1;
+                    queue.offer(new int[]{ni, nj});
+                    seen[ni][nj] = true;
+                }
+            }
+        }
+
+        return dist;
+    }
+
+
+    //从边缘的O开始，深搜，搜索所有与边缘O邻接的所有O，标记;
+    //遍历，将标记过的还原为O，将未标记的改为X；
+    public void solve(char[][] board) {
+        int n = board.length;
+        if (n == 0) {
+            return;
+        }
+        int m = board[0].length;
+        for (int i = 0; i < n; i++) {
+            dfs(board, i, 0,n,m);
+            dfs(board, i, m - 1,n,m);
+        }
+        for (int i = 1; i < m - 1; i++) {
+            dfs(board, 0, i,n,m);
+            dfs(board, n - 1, i,n,m);
+        }
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (board[i][j] == 'A') {
+                    board[i][j] = 'O';
+                } else if (board[i][j] == 'O') {
+                    board[i][j] = 'X';
+                }
+            }
+        }
+    }
+    public void dfs(char[][] board, int x, int y, int n, int m) {
+        if (x < 0 || x >= n || y < 0 || y >= m || board[x][y] != 'O'||board[x][y]=='A') {
+            return;
+        }
+        board[x][y] = 'A';
+        dfs(board, x + 1, y,n,m);
+        dfs(board, x - 1, y,n,m);
+        dfs(board, x, y + 1,n,m);
+        dfs(board, x, y - 1,n,m);
+    }
+
+    //经典有向图，拓扑排序 可以使用广度优先遍历求解
+    //我们考虑拓扑排序中最前面的节点，该节点一定不会有任何入边，也就是它没有任何的先修课程要求。
+    //当我们将一个节点加入答案中后，我们就可以移除它的所有出边，代表着它的相邻节点少了一门先修课程的要求。
+    //如果某个相邻节点变成了「没有任何入边的节点」，那么就代表着这门课可以开始学习了。
+    //按照这样的流程，我们不断地将没有入边的节点加入答案，直到答案中包含所有的节点（得到了一种拓扑排序）或者不存在没有入边的节点（图中包含环）。
+    public boolean canFinish(int numCourses, int[][] prerequisites) {
+        //由于numCourses门课编号为0-numCourses - 1, 可以利用数组下标表示每一门课的信息;
+        List<List<Integer>> edges = new LinkedList<>();//记录每门课的出边，即该课是多少其他课的先修课程;
+        int[] remains = new int[numCourses];//记录每个课程剩余先修课程数量
+
+        for (int i = 0; i < numCourses; ++i) {
+            edges.add(new LinkedList<Integer>());
+        }
+        for (int[] info : prerequisites) {
+            edges.get(info[1]).add(info[0]);
+            remains[info[0]]++;
+        }
+
+        Queue<Integer> queue = new LinkedList<Integer>();
+        for (int i = 0; i < numCourses; ++i) {
+            if (remains[i] == 0) {
+                queue.offer(i);
+            }
+        }
+
+        int visited = 0;
+        while (!queue.isEmpty()) {
+            ++visited;
+            int u = queue.poll();
+            for (int v: edges.get(u)) {
+                --remains[v];
+                if (remains[v] == 0) {
+                    queue.offer(v);
+                }
+            }
+        }
+
+        return visited == numCourses;
+    }
+
+
+
+
 
 }
 
