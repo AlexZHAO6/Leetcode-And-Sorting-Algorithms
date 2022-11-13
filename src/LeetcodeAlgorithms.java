@@ -4716,7 +4716,244 @@ class leetcode{
         return visited == numCourses;
     }
 
+    //方法同上
+    public int[] findOrder(int numCourses, int[][] prerequisites) {
+        List<List<Integer>> edges = new LinkedList<>();
+        int[] remains = new int[numCourses];
 
+        for(int i = 0; i < numCourses; i++){
+            edges.add(new LinkedList<>());
+        }
+        for(int[] tmp : prerequisites){
+            edges.get(tmp[1]).add(tmp[0]);
+            remains[tmp[0]]++;
+        }
+
+        Queue<Integer> bfsq = new LinkedList<>();
+        for(int i = 0; i < numCourses; i++){
+            if(remains[i] == 0) bfsq.offer(i);
+        }
+
+        int[] res = new int[numCourses];
+        int count = 0;
+        while(!bfsq.isEmpty()){
+            int tmp = bfsq.poll();
+            res[count++] = tmp;
+            for(int a : edges.get(tmp)){
+                remains[a]--;
+                if(remains[a] == 0) bfsq.offer(a);
+            }
+        }
+
+        if (count != numCourses) {
+            return new int[0];
+        }
+        return res;
+
+    }
+
+
+    //依次判断检查即可
+    public String validIPAddress(String queryIP) {
+        boolean isIPv4 = queryIP.contains("."), isIPv6 = queryIP.contains(":");
+        String IPv6_CHARS = "0123456789abcdefABCDEF";
+        if(isIPv4 && !isIPv6) {
+            if (checkIPv4(queryIP)) {
+                return "IPv4";
+            }
+        } else if(isIPv6 && !isIPv4) {
+            if (checkIPv6(queryIP, IPv6_CHARS)) {
+                return "IPv6";
+            }
+        }
+        return "Neither";
+    }
+    private boolean checkIPv4(String ip) {
+        String[] splits = ip.split("\\.");
+        if(splits.length != 4 || ip.charAt(0) == '.' || ip.charAt(ip.length() - 1) == '.') {
+            return false;
+        }
+        for(String s: splits) {
+            if (s.length() > 3 || s.length() == 0 || (s.length() > 1 && s.charAt(0) == '0')) {
+                return false;
+            }
+            int cur = 0;
+            for(int i = 0; i < s.length(); i++) {
+                if('0' <= s.charAt(i) && s.charAt(i) <= '9') {
+                    cur = 10 * cur + s.charAt(i) - '0';
+                } else {
+                    return false;
+                }
+            }
+            if (cur > 255) {
+                return false;
+            }
+        }
+        return true;
+    }
+    private boolean checkIPv6(String ip, String IPv6_CHARS) {
+        String[] splits = ip.split(":");
+        if(splits.length != 8 || ip.charAt(0) == ':' || ip.charAt(ip.length() - 1) == ':') {
+            return false;
+        }
+        for(String s:splits) {
+            if (s.length() > 4 || s.length() == 0) {
+                return false;
+            }
+            for(int i = 0; i < s.length(); i++) {
+                if(IPv6_CHARS.indexOf(s.charAt(i)) == -1) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    //binary search
+    public int searchInsert(int[] nums, int target) {
+        int len = nums.length;
+        int start = 0;
+        int end = len - 1;
+
+        while(start <= end){
+            int mid = (end - start)/2 + start;
+            if(nums[mid] == target) return mid;
+            else if(nums[mid] > target) end = mid - 1;
+            else start = mid + 1;
+        }
+
+        return start;
+    }
+
+    public int[] searchRange(int[] nums, int target) {
+        if(nums.length == 0) return new int[]{-1,-1};
+
+        int l = 0, r = nums.length - 1; //二分范围
+        while( l < r)			        //查找元素的开始位置
+        {
+            int mid = (l + r )/2;
+            if(nums[mid] >= target) r = mid;
+            else l = mid + 1;
+        }
+        if( nums[r] != target) return new int[]{-1,-1}; //查找失败
+        int L = r;
+        l = 0; r = nums.length - 1;     //二分范围
+        while( l < r)			        //查找元素的结束位置
+        {
+            int mid = (l + r + 1)/2;
+            if(nums[mid] <= target ) l = mid;
+            else r = mid - 1;
+        }
+        return new int[]{L,r};
+    }
+
+    //由于给定数组有序 且 常规元素总是两两出现，因此如果不考虑“特殊”的单一元素的话，
+    //我们有结论：成对元素中的第一个所对应的下标必然是偶数，成对元素中的第二个所对应的下标必然是奇数。
+    //然后再考虑存在单一元素的情况，假如单一元素所在的下标为 x，那么下标 x 之前（左边）的位置仍满足上述结论，
+    //而下标 x 之后（右边）的位置由于 x 的插入，导致结论翻转。
+    //根据上述性质可以利用二分查找思想实现logn复杂度
+    public int singleNonDuplicate(int[] nums) {
+        int n = nums.length;
+        int l = 0, r = n - 1;
+        while (l < r) {
+            int mid = (l + r) / 2;
+            if (mid % 2 == 0) {
+                if (mid + 1 < n && nums[mid] == nums[mid + 1]) l = mid + 1;
+                else r = mid;
+            } else {
+                if (mid - 1 >= 0 && nums[mid - 1] == nums[mid]) l = mid + 1;
+                else r = mid;
+            }
+        }
+        return nums[r];
+    }
+
+
+    //先排序再二分
+    public int[] findRightInterval(int[][] intervals) {
+        int n = intervals.length;
+        int[][] startIntervals = new int[n][2];
+        for (int i = 0; i < n; i++) {
+            startIntervals[i][0] = intervals[i][0];
+            startIntervals[i][1] = i;
+        }
+        Arrays.sort(startIntervals, (o1, o2) -> o1[0] - o2[0]);
+
+        int[] ans = new int[n];
+        for (int i = 0; i < n; i++) {
+            int left = 0;
+            int right = n - 1;
+            int target = -1;
+            while (left <= right) {
+                int mid = (left + right) / 2;
+                if (startIntervals[mid][0] >= intervals[i][1]) {
+                    target = startIntervals[mid][1];
+                    right = mid - 1;
+                } else {
+                    left = mid + 1;
+                }
+            }
+            ans[i] = target;
+        }
+        return ans;
+    }
+
+    //n*n复杂度的dp,每次dp[i]需要遍历i之前的数找到一个nums[j]  < nums[i];
+    public int lengthOfLIS(int[] nums) {
+        int len = nums.length;
+        int[] dp = new int[len];
+        dp[0] = 1;
+
+        int res = 1;
+        for(int i = 1; i < len; i++){
+            dp[i] = 1;
+            for(int j = 0; j < i; j++){
+                if(nums[i] > nums[j]){
+                    dp[i] = Math.max(dp[i], dp[j] + 1);
+                }
+            }
+            res = Math.max(res, dp[i]);
+        }
+
+        return res;
+    }
+
+    //二分+双指针
+    //先通过「二分」找到与 x 差值最小的位置 idx 然后双指针向外扩展
+    public List<Integer> findClosestElements(int[] arr, int k, int x) {
+        int right = binary_help(arr, x);
+        int left = right - 1;
+        while (k > 0) {
+            k--;
+            if (left < 0) {
+                right++;
+            } else if (right >= arr.length) {
+                left--;
+            } else if (x - arr[left] <= arr[right] - x) {
+                left--;
+            } else {
+                right++;
+            }
+        }
+        List<Integer> ans = new ArrayList<Integer>();
+        for (int i = left + 1; i < right; i++) {
+            ans.add(arr[i]);
+        }
+
+        return ans;
+    }
+    public int binary_help(int[] arr, int x){
+        int low = 0, high = arr.length - 1;
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+            if (arr[mid] >= x) {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+        return low;
+    }
 
 
 
