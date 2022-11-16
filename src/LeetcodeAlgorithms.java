@@ -4955,6 +4955,159 @@ class leetcode{
         return low;
     }
 
+    //二分查找, 先找到所在行，在行内再二分
+    public boolean searchMatrix(int[][] matrix, int target) {
+        int rows = matrix.length;
+        int cols = matrix[0].length;
+
+        int row = 0;
+        for(int i = 0; i < rows; i++){
+            if(target >= matrix[i][0]) row = i;
+        }
+
+        int left = 0;
+        int right = cols - 1;
+        while(left <= right){
+            int mid = (left + right)/2;
+            if(matrix[row][mid] == target) return true;
+            else if(matrix[row][mid] > target) right = mid - 1;
+            else left = mid + 1;
+        }
+        return false;
+    }
+
+    //基于mid拆分后，总有一边是有序的，根据有序的那边判断判断是否要在有序的那边搜索;
+    //变种二分
+    public int search(int[] nums, int target) {
+        int n = nums.length;
+        if (n == 0) {
+            return -1;
+        }
+        if (n == 1) {
+            return nums[0] == target ? 0 : -1;
+        }
+        int l = 0, r = n - 1;
+        while (l <= r) {
+            int mid = (l + r) / 2;
+            if (nums[mid] == target) {
+                return mid;
+            }
+            if (nums[0] <= nums[mid]) {
+                if (nums[0] <= target && target < nums[mid]) {
+                    r = mid - 1;
+                } else {
+                    l = mid + 1;
+                }
+            } else {
+                if (nums[mid] < target && target <= nums[n - 1]) {
+                    l = mid + 1;
+                } else {
+                    r = mid - 1;
+                }
+            }
+        }
+        return -1;
+    }
+
+
+    //直接二分判断当前是否大于下一个点，若大于则可能是峰值，r = mid，否则 l = mid + 1;
+    //根据题意，我们有「数据长度至少为 1」、「越过数组两边看做负无穷」和「相邻元素不相等」的起始条件。
+    //条件保证了数组必然有峰值，可以用二分;
+    public int findPeakElement(int[] nums) {
+        int n = nums.length;
+        int l = 0, r = n - 1;
+        while (l < r) {
+            int mid = (l + r) / 2;
+            if (nums[mid] > nums[mid + 1]) r = mid;
+            else l = mid + 1;
+        }
+        return r;
+    }
+
+    //dp, 用for循环代替dp数组
+    public int climbStairs(int n) {
+        int p = 0, q = 0, r = 1;
+        for (int i = 1; i <= n; ++i) {
+            p = q;
+            q = r;
+            r = p + q;
+        }
+        return r;
+    }
+
+    //贪心法，遍历数组，若当前位置可到达，判断最远能走多远，若能走到边界返回true;
+    //否则false
+    public boolean canJump(int[] nums) {
+        int len = nums.length;
+        int max = 0;
+
+        for(int i = 0; i < len; i++){
+            if(i <= max){
+                max = Math.max(max, i + nums[i]);
+                if(max >= len - 1) return true;
+            }
+        }
+
+        return false;
+    }
+
+    //如果我们「贪心」地进行正向查找，每次找到可到达的最远位置，就可以在线性时间内得到最少的跳跃次数。
+    //如:初始位置是下标 0，从下标 0 出发，最远可到达下标 2。下标 0 可到达的位置中，下标 1 的值是 3，从下标 1 出发可以达到更远的位置，因此第一步到达下标 1。
+    //在具体的实现中，我们维护当前能够到达的最大下标位置，记为边界。我们从左到右遍历数组，到达边界时，更新边界并将跳跃次数增加 1。
+    public int jump(int[] nums) {
+        int length = nums.length;
+        int end = 0;
+        int maxPosition = 0;
+        int steps = 0;
+        for (int i = 0; i < length - 1; i++) {
+            maxPosition = Math.max(maxPosition, i + nums[i]);
+            if (i == end) {
+                end = maxPosition;
+                steps++;
+            }
+        }
+        return steps;
+    }
+
+    //二分思想，当当前元素满足有>=k个值小于它时,right = mid, 即有可能是答案或者还能找到更小的值满足条件
+    //else left = mid + 1
+    //输出的left必然在矩阵中因为算法找的是最小的满足条件的值，若不在矩阵中值不会是最小的！！
+    //比如1 3 10， 找第二大; 只有3满足 4，5也满足但不够小; 只有找到一个矩阵中的值 让 k+1才满足最小！
+    public int kthSmallest(int[][] matrix, int k) {
+        int len = matrix.length;
+
+        int left = matrix[0][0];
+        int right = matrix[len-1][len-1];
+
+        while(left < right){
+            int mid = left + ((right - left) >> 1);
+            if(kthSmallest_help(matrix, mid, k, len)){
+                right = mid;
+            }
+            else left = mid + 1;
+        }
+
+        return left;
+    }
+    //我们可以看到，矩阵中大于 mid的数就和不大于 mid的数分别形成了两个板块
+    //沿着一条锯齿线将这个矩形分开。其中左上角板块的大小即为矩阵中不大于 mid的数的数量。
+    //我们只要沿着这条锯齿线走一遍即可计算出这两个板块的大小，也自然就统计出了这个矩阵中不大于 mid的数的个数了。
+    //即:从左下角开始，若其值 <= mid 则一整列都 <= mid; 右移继续判断，当不满足<=mid时 上移(i--);
+    public boolean kthSmallest_help(int[][] matrix, int mid, int k, int len){
+        int i = len - 1;
+        int j = 0;
+        int num = 0;
+        while (i >= 0 && j < len) {
+            if (matrix[i][j] <= mid) {
+                num += i + 1;
+                j++;
+            } else {
+                i--;
+            }
+        }
+
+        return num >= k;
+    }
 
 
 }
