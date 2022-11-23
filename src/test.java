@@ -30,5 +30,8 @@ public class test {
         Date date = new Date();
         System.out.println(formatter.format(date));
 
+        int testtt = ' ' - '0';
+        System.out.println(testtt);
+
     }
 }

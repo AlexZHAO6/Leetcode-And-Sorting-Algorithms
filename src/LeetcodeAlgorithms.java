@@ -5109,6 +5109,107 @@ class leetcode{
         return num >= k;
     }
 
+    //一维dp
+    public int rob(int[] nums) {
+        int len = nums.length;
+        int[] dp = new int[len];
+        dp[0] = nums[0];
+        if(len < 2) return dp[0];
+        dp[1] = Math.max(nums[0], nums[1]);
+        int max = dp[1];
+        for(int i = 2; i < len; i++){
+            dp[i] = Math.max(dp[i-2] + nums[i], dp[i-1]);
+            max = Math.max(max, dp[i]);
+        }
+
+        return max;
+    }
+
+
+    //由于房屋首位相连，用2次dp，先算0 - n-2 的最大值，再算 1- n-1 的最大值， 然后两个取最大！！
+    public int rob2(int[] nums) {
+        int length = nums.length;
+        if (length == 1) {
+            return nums[0];
+        } else if (length == 2) {
+            return Math.max(nums[0], nums[1]);
+        }
+        return Math.max(robRange(nums, 0, length - 2), robRange(nums, 1, length - 1));
+    }
+
+    public int robRange(int[] nums, int start, int end) {
+        int first = nums[start], second = Math.max(nums[start], nums[start + 1]);
+        for (int i = start + 2; i <= end; i++) {
+            int temp = second;
+            second = Math.max(first + nums[i], second);
+            first = temp;
+        }
+        return second;
+    }
+
+
+    //一维dp dp[i] = dp[i-1] + dp[i-2] 当 当前位置单独构成item且可以与前一个值共同构成item
+    public int numDecodings(String s) {
+        int n = s.length();
+        s = " " + s;
+        char[] cs = s.toCharArray();
+        int[] f = new int[n + 1];
+        f[0] = 1;
+        for (int i = 1; i <= n; i++) {
+            // a : 代表「当前位置」单独形成 item
+            // b : 代表「当前位置」与「前一位置」共同形成 item
+            int a = cs[i] - '0', b = (cs[i - 1] - '0') * 10 + (cs[i] - '0');
+            // 如果 a 属于有效值，那么 f[i] 可以由 f[i - 1] 转移过来
+            if (1 <= a && a <= 9) f[i] += f[i - 1];
+            // 如果 b 属于有效值，那么 f[i] 可以由 f[i - 2] 或者 f[i - 1] & f[i - 2] 转移过来
+            if (10 <= b && b <= 26) f[i] += f[i - 2];
+        }
+        return f[n];
+    }
+
+    //下一个丑数是当前指针*2/3/5 的最小值;
+    //以此得到状态转移方程，从而使用dp求解
+    public int nthUglyNumber(int n) {
+        int[] dp = new int[n + 1];
+        dp[1] = 1;
+        int p2 = 1, p3 = 1, p5 = 1;
+        for (int i = 2; i <= n; i++) {
+            int num2 = dp[p2] * 2, num3 = dp[p3] * 3, num5 = dp[p5] * 5;
+            dp[i] = Math.min(Math.min(num2, num3), num5);
+            if (dp[i] == num2) {
+                p2++;
+            }
+            if (dp[i] == num3) {
+                p3++;
+            }
+            if (dp[i] == num5) {
+                p5++;
+            }
+        }
+
+        return dp[n];
+    }
+
+    //二维dp
+    //我们目前持有一支股票，对应的「累计最大收益」记为 f[i][0]f[i][0]；
+    //我们目前不持有任何股票，并且处于冷冻期中，对应的「累计最大收益」记为 f[i][1]f[i][1]；
+    //我们目前不持有任何股票，并且不处于冷冻期中，对应的「累计最大收益」记为 f[i][2]f[i][2]。
+    //!!！！!这里的「处于冷冻期」指的是在第 i天结束之后的状态。也就是说：如果第 i天结束之后处于冷冻期，那么第 i+1天无法买入股票。！！!!!
+    public int maxProfit_withfrozen(int[] prices) {
+        int len = prices.length;
+        if(len == 0) return 0;
+        int[][] dp = new int[len][3];
+        dp[0][0] = -prices[0];
+
+        for(int i = 1; i < len; i++){
+            dp[i][0] = Math.max(dp[i-1][0], dp[i-1][2] - prices[i]);
+            dp[i][1] = dp[i-1][0] + prices[i];
+            dp[i][2] = Math.max(dp[i-1][2], dp[i-1][1]);
+        }
+
+
+        return Math.max(dp[len-1][1], dp[len-1][2]);
+    }
 
 }
 
