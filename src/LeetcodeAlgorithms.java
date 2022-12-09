@@ -12,6 +12,7 @@ class leetcode{
     private int treenode_ans;
     private TreeNode ans = null;
     private static int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+    private int count = 0;
 
 
     Map<Node,Node> cachemap = new HashMap<>();
@@ -5209,6 +5210,266 @@ class leetcode{
 
 
         return Math.max(dp[len-1][1], dp[len-1][2]);
+    }
+
+    //二维dp求解
+    //其中dp[i][j]表示从数组的 [0,i]下标范围内选取若干个正整数（可以是 0 个），是否存在一种选取方案使得被选取的正整数的和等于j
+    public boolean canPartition(int[] nums) {
+        int n = nums.length;
+        if (n < 2) {
+            return false;
+        }
+        int sum = 0, maxNum = 0;
+        for (int num : nums) {
+            sum += num;
+            maxNum = Math.max(maxNum, num);
+        }
+        if (sum % 2 != 0) {
+            return false;
+        }
+        int target = sum / 2;
+        if (maxNum > target) {
+            return false;
+        }
+        boolean[][] dp = new boolean[n][target + 1];
+        for (int i = 0; i < n; i++) {
+            dp[i][0] = true;
+        }
+        dp[0][nums[0]] = true;
+        for (int i = 1; i < n; i++) {
+            int num = nums[i];
+            for (int j = 1; j <= target; j++) {
+                if (j >= num) {
+                    dp[i][j] = dp[i - 1][j] | dp[i - 1][j - num];
+                } else {
+                    dp[i][j] = dp[i - 1][j];
+                }
+            }
+        }
+        return dp[n - 1][target];
+    }
+
+    //一维dp, dp[i]表示最少需要多少个数的平方来表示整数i。
+    //dp[i] = 1 + min(dp[i - j*j]), j = (1, 根号i);
+    public int numSquares(int n) {
+        int[] dp = new int[n + 1];
+        for(int i = 1; i < n + 1; i++){
+            int min = Integer.MAX_VALUE;
+            for(int j = 1; j * j <= i; j++){
+                min = Math.min(min, dp[i- j*j]);
+            }
+            dp[i] = min + 1;
+        }
+
+        return dp[n];
+    }
+
+    //一维dp, dp[i]表示最少需要多少个数的coin凑齐i。
+    public int coinChange(int[] coins, int amount) {
+        int len = coins.length;
+        int[] dp = new int[amount + 1];
+        Arrays.fill(dp, amount + 1);
+        dp[0] = 0;
+
+        for(int i = 1; i < amount + 1; i++){
+            for(int j = 0; j < len; j++){
+                if(coins[j] <= i){
+                    dp[i] = Math.min(dp[i], dp[i-coins[j]] + 1);
+                }
+            }
+        }
+
+        return dp[amount] > amount ? -1 : dp[amount];
+    }
+
+
+    //回溯遍历所有可能的组合，若成立 count++;
+    public int findTargetSumWays(int[] nums, int target) {
+        backtrack(nums, target, 0, 0);
+        return count;
+    }
+
+    public void backtrack(int[] nums, int target, int index, int sum) {
+        if (index == nums.length) {
+            if (sum == target) {
+                count++;
+            }
+        } else {
+            backtrack(nums, target, index + 1, sum + nums[index]);
+            backtrack(nums, target, index + 1, sum - nums[index]);
+        }
+    }
+
+
+    //二维dp！
+    public int uniquePaths(int m, int n) {
+        int[][] dp = new int[m][n];
+        for(int i = 0; i < n; i++){
+            dp[0][i] = 1;
+        }
+        for(int i = 0; i < m; i++){
+            dp[i][0] = 1;
+        }
+
+        for(int i = 1; i < m; i++){
+            for(int j = 1; j < n; j++){
+                dp[i][j] = dp[i-1][j] + dp[i][j-1];
+            }
+        }
+
+        return dp[m-1][n-1];
+    }
+
+    public int uniquePathsWithObstacles(int[][] obstacleGrid) {
+        if (obstacleGrid == null || obstacleGrid.length == 0) {
+            return 0;
+        }
+
+        // 定义 dp 数组并初始化第 1 行和第 1 列。
+        int m = obstacleGrid.length, n = obstacleGrid[0].length;
+        int[][] dp = new int[m][n];
+        for (int i = 0; i < m && obstacleGrid[i][0] == 0; i++) {
+            dp[i][0] = 1;
+        }
+        for (int j = 0; j < n && obstacleGrid[0][j] == 0; j++) {
+            dp[0][j] = 1;
+        }
+
+        // 根据状态转移方程 dp[i][j] = dp[i - 1][j] + dp[i][j - 1] 进行递推。
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                if (obstacleGrid[i][j] == 0) {
+                    dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+                }
+            }
+        }
+        return dp[m - 1][n - 1];
+    }
+
+    //二维dp求解
+    //dp[i][j] = Math.min(dp[i-1][j], dp[i][j-1]) + grid[i][j]; dp[i][j] 表示到达当前点的最小cost
+    public int minPathSum(int[][] grid) {
+        int rows = grid.length;
+        int cols = grid[0].length;
+
+        int[][] dp = new int[rows][cols];
+        dp[0][0] = grid[0][0];
+        for(int i = 1; i < cols; i++){
+            dp[0][i] = dp[0][i-1] + grid[0][i];
+        }
+        for(int i = 1; i < rows; i++){
+            dp[i][0] = dp[i-1][0] + grid[i][0];
+        }
+
+        for(int i = 1; i < rows; i++){
+            for (int j = 1; j < cols; j++){
+                dp[i][j] = Math.min(dp[i-1][j], dp[i][j-1]) + grid[i][j];
+            }
+        }
+        return dp[rows-1][cols-1];
+    }
+
+    //经典二维dp
+    public int minimumTotal(List<List<Integer>> triangle) {
+        int n = triangle.size();
+        int[][] f = new int[n][n];
+        f[0][0] = triangle.get(0).get(0);
+        for (int i = 1; i < n; ++i) {
+            f[i][0] = f[i - 1][0] + triangle.get(i).get(0);
+            for (int j = 1; j < i; ++j) {
+                f[i][j] = Math.min(f[i - 1][j - 1], f[i - 1][j]) + triangle.get(i).get(j);
+            }
+            f[i][i] = f[i - 1][i - 1] + triangle.get(i).get(i);
+        }
+        int minTotal = f[n - 1][0];
+        for (int i = 1; i < n; ++i) {
+            minTotal = Math.min(minTotal, f[n - 1][i]);
+        }
+        return minTotal;
+    }
+
+    //dp[i][j]表示以i j为右下角的正方形的最大边长！
+    public int maximalSquare(char[][] matrix) {
+        int maxSide = 0;
+        if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
+            return maxSide;
+        }
+        int rows = matrix.length, columns = matrix[0].length;
+        int[][] dp = new int[rows][columns];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                if (matrix[i][j] == '1') {
+                    if (i == 0 || j == 0) {
+                        dp[i][j] = 1;
+                    } else {
+                        //状态转移！
+                        dp[i][j] = Math.min(Math.min(dp[i - 1][j], dp[i][j - 1]), dp[i - 1][j - 1]) + 1;
+                    }
+                    maxSide = Math.max(maxSide, dp[i][j]);
+                }
+            }
+        }
+        int maxSquare = maxSide * maxSide;
+        return maxSquare;
+    }
+
+    //dp G(n) += G(i-i) * G(n - i), 累加，当 i=1到n;
+    //G(n) 表示 长度为 n的序列能构成的不同二叉搜索树的个数。
+    public int numTrees(int n) {
+        int[] G = new int[n + 1];
+        G[0] = 1;
+        G[1] = 1;
+
+        for (int i = 2; i <= n; ++i) {
+            for (int j = 1; j <= i; ++j) {
+                G[i] += G[j - 1] * G[i - j];
+            }
+        }
+        return G[n];
+    }
+
+
+    //二维dp，dp[i][j] = dp[i+1][j-1] + 2, when s[i] = s[j];
+    //dp[i][j] represent the max length of the string from i to j;
+    public int longestPalindromeSubseq(String s) {
+        int n = s.length();
+        int[][] dp = new int[n][n];
+        for (int i = n - 1; i >= 0; i--) {
+            dp[i][i] = 1;
+            char c1 = s.charAt(i);
+            for (int j = i + 1; j < n; j++) {
+                char c2 = s.charAt(j);
+                if (c1 == c2) {
+                    dp[i][j] = dp[i + 1][j - 1] + 2;
+                } else {
+                    dp[i][j] = Math.max(dp[i + 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        return dp[0][n - 1];
+    }
+
+    //思路类似寻找两个字符最长公共子串;
+    //dp[i][j] 表示，word1[0:i]和word2[0：j]的最长公共子序列的长度;
+    //求出最长子序列后，将两个字符串长度-最长序列再相加，就是操作的次数！！(len1 - dp[len1][len2]) + (len2 - dp[len1][len2]);
+    public int minDistance(String word1, String word2) {
+        int len1 = word1.length();
+        int len2 = word2.length();
+
+        int[][] dp = new int[len1+1][len2+1];
+        dp[0][0] = 0;
+        for(int i = 1; i <= len1; i++){
+            char tmp1 = word1.charAt(i-1);
+            for(int j = 1; j <= len2; j++){
+                char tmp2 = word2.charAt(j-1);
+                if(tmp1 == tmp2){
+                    dp[i][j] = dp[i-1][j-1] + 1;
+                }
+                else dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+            }
+        }
+
+        return (len1 - dp[len1][len2]) + (len2 - dp[len1][len2]);
     }
 
 }
