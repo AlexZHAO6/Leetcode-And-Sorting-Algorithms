@@ -3084,7 +3084,7 @@ class leetcode{
                     map.remove(s.charAt(start));
                     start++;
                 }
-                tmp = end - start + 1;
+                tmp = end - start;
             }
         }
 
@@ -5472,6 +5472,151 @@ class leetcode{
         return (len1 - dp[len1][len2]) + (len2 - dp[len1][len2]);
     }
 
+    //二维dp,dp[i][j]表示s1前i个和s2前j个是否能构成s3前i+j个
+    public boolean isInterleave(String s1, String s2, String s3) {
+        int lens1 = s1.length();
+        int lens2 = s2.length();
+        int lens3 = s3.length();
+        if(lens1 + lens2 != lens3) return false;
+        boolean[][] dp = new boolean[lens1+1][lens2+1];
+        dp[0][0] = true;
+
+        for(int i = 0; i <= lens1; i++){
+            for(int j = 0; j <= lens2; j++){
+                int index = i + j - 1;
+                //状态转移, 当dp[i-1][j]为真且s1第i个元素与s3第i+j-1个元素相等，则真
+                //同理j也是一样！！！
+                if(i > 0) dp[i][j] = dp[i][j] || (dp[i-1][j] && s1.charAt(i-1) == s3.charAt(index));
+                if(j > 0) dp[i][j] = dp[i][j] || (dp[i][j-1] && s2.charAt(j-1) == s3.charAt(index));
+            }
+        }
+
+        return dp[lens1][lens2];
+    }
+
+
+    //一维dp dp[i]表示s的前i个字符能否被wordDict里的字符组成;
+    //j用于分割i,只要有一个dp[j]满足且j - i-1的字符串也在myset内 则证明其可以被wordDict中单词组成!
+    public boolean wordBreak(String s, List<String> wordDict) {
+        Set<String> myset = new HashSet<>(wordDict);
+        int len = s.length();
+        boolean[] dp = new boolean[len+1];
+        dp[0] = true;
+        for(int i = 1; i <= len; i++){
+            for(int j = 0; j < i; j++){
+                if (dp[j] && myset.contains(s.substring(j, i))) {
+                    dp[i] = true;
+                    break;
+                }
+            }
+        }
+
+        return dp[len];
+    }
+
+    //dp预处理字符串，使判断是否回文复杂度为O(1)，然后回溯
+    public List<List<String>> partition(String s) {
+        List<List<String>> ret = new ArrayList<List<String>>();
+        List<String> ans = new ArrayList<String>();
+        int n = s.length();
+        boolean[][] dp = new boolean[n][n];
+
+        // 边界1: 对角线，即单个字符，都是回文
+        for(int i = 0; i < n; i++){
+            dp[i][i] = true;
+        }
+// 边界2:对角线上侧紧邻斜线，即两个字符，判断是否相等，相等则为回文
+        for(int i = 0; i < n - 1; i++){
+            dp[i][i + 1] = s.charAt(i) == s.charAt(i+ 1);
+        }
+// 从下到上，边界1和边界2确定了两条斜线，所以只需要从倒数第三行开始往上补全右上三角
+        for(int i = n - 3; i >= 0; i--){
+            for(int j = i + 2; j < n; j++){
+                dp[i][j] = dp[i + 1][j - 1] && (s.charAt(i) == s.charAt(j));
+            }
+        }
+
+        dfs(s, 0,n,dp,ret,ans);
+        return ret;
+    }
+
+    public void dfs(String s, int i, int n, boolean[][] f, List<List<String>> ret, List<String> ans) {
+        if (i == n) {
+            ret.add(new ArrayList<String>(ans));
+            return;
+        }
+        for (int j = i; j < n; ++j) {
+            if (f[i][j]) {
+                ans.add(s.substring(i, j + 1));
+                dfs(s, j + 1,n,f,ret,ans);
+                ans.remove(ans.size() - 1);
+            }
+        }
+    }
+
+    public int rob(TreeNode root) {
+        Map<TreeNode, Integer> f = new HashMap<TreeNode, Integer>();
+        Map<TreeNode, Integer> g = new HashMap<TreeNode, Integer>();
+
+        rob_dfs(root, f, g);
+        return Math.max(f.getOrDefault(root, 0), g.getOrDefault(root, 0));
+    }
+    public void rob_dfs(TreeNode node, Map<TreeNode, Integer> f, Map<TreeNode, Integer> g) {
+        if (node == null) {
+            return;
+        }
+        rob_dfs(node.left, f, g);
+        rob_dfs(node.right, f, g);
+        //我们可以用 f(o)表示选择o 节点的情况下，o节点的子树上被选择的节点的最大权值和；g(o)表示不选择o节点的情况下，o节点的子树上被选择的节点的最大权值和；
+        // l和 r代表 o的左右孩子。
+        //当 o被选中时，o的左右孩子都不能被选中，故 o被选中情况下子树上被选中点的最大权值和为 l和 r不被选中的最大权值和相加，即 f(o) = g(l) + g(r)
+        //当 o不被选中时，oo 的左右孩子可以被选中，也可以不被选中。对于 o的某个具体的孩子x，它对 o的贡献是 x被选中和不被选中情况下权值和的较大值.
+        //故g(o) = Max(f(l) , g(l)) + Max(f(r) + g(r));
+        f.put(node, node.val + g.getOrDefault(node.left, 0) + g.getOrDefault(node.right, 0));
+        g.put(node, Math.max(f.getOrDefault(node.left, 0), g.getOrDefault(node.left, 0)) + Math.max(f.getOrDefault(node.right, 0), g.getOrDefault(node.right, 0)));
+    }
+
+
+    //暴力搜索， 回溯 + 合理剪纸 可以通过所有case！！
+    //从球的视角出发，每个球都必然属于某一个桶，总共k个桶，回溯遍历所有可能情况即可
+    public boolean canPartitionKSubsets(int[] nums, int k) {
+        int len = nums.length;
+        int sum = 0;
+        for(int i = 0; i < len; i++){
+            sum += nums[i];
+        }
+        if(sum % k != 0) return false;
+        int target = sum / k;
+        //如果我们让 nums[] 内的元素递减排序，先让值大的元素选择桶，这样可以增加剪枝的命中率，从而降低回溯的概率
+        Arrays.sort(nums);
+        int l = 0, r = nums.length - 1;
+        while (l <= r) {
+            int temp = nums[l];
+            nums[l] = nums[r];
+            nums[r] = temp;
+            l++;
+            r--;
+        }
+        if(nums[0] > target) return false;
+        int[] bucket = new int[k];
+        return canPartitionKSubsets_dfs(nums, k, bucket, target, 0);
+    }
+    public boolean canPartitionKSubsets_dfs(int[] nums, int k, int[] bucket, int target, int index){
+        // 结束条件：已经处理完所有球
+        //因为当 index == num.length 时，所有球已经按要求装入所有桶，所以肯定是一个满足要求的解 即：每个桶内球的和一定为 target
+        if(index == nums.length) return true;
+
+        for(int i = 0; i < k; i++){
+            if(bucket[i] + nums[index] > target) continue;
+            //原因：如果元素和相等，那么 nums[index] 选择上一个桶和选择当前桶可以得到的结果是一致的,可以跳过
+            if(i > 0 && bucket[i-1] == bucket[i]) continue;
+            bucket[i] += nums[index];
+            if(canPartitionKSubsets_dfs(nums, k, bucket, target, index+1)) return true;
+            bucket[i] -= nums[index];
+        }
+
+        return false;
+    }
 }
 
 // Definition for a Node with random point.

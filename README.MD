@@ -10,4 +10,5 @@ General Algorithms && Leetcode
 
 --- Leetcode
 
-    TODO: 动态规划与字符串 97
+    Done: 根据类型刷题，后续刷第二次
+    TODO: Hot100  No : 10, 23

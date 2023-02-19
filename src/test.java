@@ -1,38 +1,42 @@
 import java.text.SimpleDateFormat;
-import java.util.*;
 import java.util.stream.Collectors;
-
+import java.util.*;
 public class test {
+
     public static void main(String[] args){
-        int a = -20;
-        int b = Math.abs(a);
+        int INITIAL_CAPACITY = 2;
+        Solution solution = new Solution();
 
-        char c = 'c';
-        char d = 'd';
-
-        //JAVA stream API, practice GroupBy!!
-        int[] test = {1,1,2,2,3,4,7,8,9};
-        Map<Integer,List<Integer>> map =  Arrays.stream(test).boxed().collect(Collectors.groupingBy(Integer::intValue));
-
-        for(int inn : map.keySet()){
-            System.out.println(map.get(inn).size());
-        }
-
-        StringBuilder res = new StringBuilder("abba");
-        StringBuilder res2 = new StringBuilder(res.toString());
-
-        res = res.reverse();
-        System.out.println(res);
-        System.out.println(res2);
-
-        //this is how to get current time in java
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-        Date date = new Date();
-        System.out.println(formatter.format(date));
-
-        int testtt = ' ' - '0';
-        System.out.println(testtt);
 
     }
 
+
 }
+
+class Solution{
+    public int solution(int[] A) {
+        int len = A.length;
+        if(len == 1) return A[0] == 1 ? 2 : 1;
+        Arrays.sort(A);
+
+        for(int i = 0; i < len - 1; i++){
+            if(i == 0 && A[i] > 1) return 1;
+            if(A[i] <= 0 && A[i+1] > 1) return 1;
+            if(A[i] <= 0) continue;
+
+            if(A[i+1] - A[i] <= 1) continue;
+            else return A[i] + 1;
+        }
+
+        return A[len - 1] <= 0 ? 1 : A[len - 1] + 1;
+        // Implement your solution here
+    }
+
+
+}
+
+
+
+
+
+
