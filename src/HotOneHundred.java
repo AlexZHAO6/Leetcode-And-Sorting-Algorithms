@@ -1,8 +1,10 @@
 import java.util.*;
+import java.lang.*;
 
 public class HotOneHundred {
     public static void main(String[] args){
-
+        Codes codes = new Codes();
+        System.out.println("Hot 100!!!");
     }
 }
 
