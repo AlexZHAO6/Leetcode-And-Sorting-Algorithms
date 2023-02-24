@@ -11,5 +11,5 @@ General Algorithms && Leetcode
 
 --- Leetcode
     
-    TODO: Chapter 1.1
+    TODO: Chapter 0 4节第2部分
     TODO: How to caucalate the Big O of recursion algorithm?
