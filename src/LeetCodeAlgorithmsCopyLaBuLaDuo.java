@@ -883,6 +883,260 @@ class Algorithms
         return res;
     }
 
+    /* 注意：调用这个函数之前一定要先给 nums 排序 */
+    // n 填写想求的是几数之和，start 从哪个索引开始计算（一般填 0），target 填想凑出的目标和
+    //nSum的通用解决方法，实际就是基于2Sum可以求3Sum(遍历数组,找2SUM = Target - nums【i】);
+    //依此类推，基于4Sum求3Sum 5Sum求4Sum ... 递归写法如下！
+    public List<List<Integer>> threeSum(int[] nums) {
+        Arrays.sort(nums);
+        // n 为 3，从 nums[0] 开始计算和为 0 的三元组
+        return nSumTarget(nums, 3, 0, 0);
+    }
+    public List<List<Integer>> nSumTarget(
+            int[] nums, int n, int start, int target) {
+
+        int sz = nums.length;
+        List<List<Integer>> res = new ArrayList<>();
+        // 至少是 2Sum，且数组大小不应该小于 n
+        if (n < 2 || sz < n) return res;
+        // 2Sum 是 base case
+        if (n == 2) {
+            // 双指针那一套操作
+            int lo = start, hi = sz - 1;
+            while (lo < hi) {
+                int sum = nums[lo] + nums[hi];
+                int left = nums[lo], right = nums[hi];
+                if (sum < target) {
+                    while (lo < hi && nums[lo] == left) lo++;
+                } else if (sum > target) {
+                    while (lo < hi && nums[hi] == right) hi--;
+                } else {
+                    res.add(new ArrayList<>(Arrays.asList(left, right)));
+                    while (lo < hi && nums[lo] == left) lo++;
+                    while (lo < hi && nums[hi] == right) hi--;
+                }
+            }
+        } else {
+            // n > 2 时，递归计算 (n-1)Sum 的结果
+            for (int i = start; i < sz; i++) {
+                List<List<Integer>>
+                        sub = nSumTarget(nums, n - 1, i + 1, target - nums[i]);
+                for (List<Integer> arr : sub) {
+                    // (n-1)Sum 加上 nums[i] 就是 nSum
+                    arr.add(nums[i]);
+                    res.add(arr);
+                }
+                while (i < sz - 1 && nums[i] == nums[i + 1]) i++;
+            }
+        }
+        return res;
+    }
+
+    //classic dp, 打家劫舍
+    public int rob(int[] nums) {
+        int len = nums.length;
+        int[] dp = new int[len];
+        dp[0] = nums[0];
+        if(len < 2) return dp[0];
+        dp[1] = Math.max(nums[0], nums[1]);
+        int max = dp[1];
+        for(int i = 2; i < len; i++){
+            dp[i] = Math.max(dp[i-2] + nums[i], dp[i-1]);
+            max = Math.max(max, dp[i]);
+        }
+
+        return max;
+    }
+
+    //房子首位相连，首尾房间不能同时被抢，那么只可能有三种不同情况：要么都不被抢；要么第一间房子被抢最后一间不抢；要么最后一间房子被抢第一间不抢。
+    //哪种的结果最大，就是最终答案呗！不过，其实我们不需要比较三种情况，只要比较情况二和情况三就行了。 就是:Math.max(robRange(nums, 0, length - 2), robRange(nums, 1, length - 1));
+    public int rob_2(int[] nums) {
+        int length = nums.length;
+        if (length == 1) {
+            return nums[0];
+        } else if (length == 2) {
+            return Math.max(nums[0], nums[1]);
+        }
+        return Math.max(robRange(nums, 0, length - 2), robRange(nums, 1, length - 1));
+    }
+
+    public int robRange(int[] nums, int start, int end) {
+        int len = end - start + 1;
+        int[] dp = new int[len];
+        dp[0] = nums[start];
+        if(len < 2) return dp[0];
+        dp[1] = Math.max(nums[start], nums[start + 1]);
+        int max = dp[1];
+        for(int i = 2; i < len; i++){
+            dp[i] = Math.max(dp[i-2] + nums[i+start], dp[i-1]);
+            max = Math.max(max, dp[i]);
+        }
+
+        return max;
+    }
+
+    //从列表变成二叉树的打家劫舍
+    public int rob(TreeNode root) {
+        //思想与dp相同，对于一个节点有俩选择，选or不选
+        Map<TreeNode, Integer> f = new HashMap<TreeNode, Integer>(); //表示选中节点其子树能rob的最大值
+        Map<TreeNode, Integer> g = new HashMap<TreeNode, Integer>(); //表示不选中节点其子树能rob的最大值
+
+        rob_dfs(root, f, g);
+        return Math.max(f.getOrDefault(root, 0), g.getOrDefault(root, 0));
+    }
+    public void rob_dfs(TreeNode node, Map<TreeNode, Integer> f, Map<TreeNode, Integer> g) {
+        if (node == null) {
+            return;
+        }
+        rob_dfs(node.left, f, g);
+        rob_dfs(node.right, f, g);
+        //当node被选中，则左右孩子不能选，则 f(node) = g(left) + g(right)
+        //当node不被选中，则左右孩子可选可不选，对于孩子x 则最大值为Max(f(x),g(x));
+        f.put(node, node.val + g.getOrDefault(node.left, 0) + g.getOrDefault(node.right, 0));
+        g.put(node, Math.max(f.getOrDefault(node.left, 0), g.getOrDefault(node.left, 0)) + Math.max(f.getOrDefault(node.right, 0), g.getOrDefault(node.right, 0)));
+    }
+
+    //经典股票买卖的一系列问题！
+    //dp[i][k][0 or 1]
+    //0 <= i <= n - 1, 1 <= k <= K
+    //n 为天数，大 K 为交易数的上限，0 和 1 代表是否持有股票。
+    //此问题共 n × K × 2 种状态，全部穷举就能搞定。
+    //
+    //for 0 <= i < n:
+    //    for 1 <= k <= K:
+    //        for s in {0, 1}:
+    //            dp[i][k][s] = max(buy, sell, rest)
+    //此题相当于K = 1, K没用了; 可以假定每次都是前一天买第二天卖，计算收益，使用DP保存收益然后一直更新，s也没用了。
+    public int maxProfit(int[] prices) {
+        int len = prices.length;
+        if(len <= 1) return 0;
+
+        int[] dp = new int[len+1];
+        dp[0] = 0;
+        dp[1] = 0;
+
+        int max = Integer.MIN_VALUE;
+        for(int i = 2; i < len + 1; i++){
+            dp[i] = Math.max(0, dp[i-1] + (prices[i-1] - prices[i - 2]));
+            max = Math.max(max,dp[i]);
+        }
+
+        return max;
+    }
+
+    //K为正无穷，K = K-1 K没用了
+    public int maxProfit_2(int[] prices) {
+        int len = prices.length;
+        int[][] dp = new int[len][2];
+        dp[0][0] = 0;
+        dp[0][1] = -prices[0];
+
+        for(int i = 1; i < len; i++){
+            dp[i][0] = Math.max(dp[i-1][0], dp[i-1][1] + prices[i]);
+            dp[i][1] = Math.max(dp[i-1][1], dp[i-1][0] - prices[i]);
+        }
+
+        return dp[len-1][0];
+    }
+
+    //K无穷大没用了，与上面一样
+    public int maxProfit_3(int[] prices) {
+        int len = prices.length;
+        int[][] dp = new int[len][2];
+        dp[0][0] = 0;
+        dp[0][1] = -prices[0];
+        if(len > 1){
+            dp[1][0] = Math.max(0, prices[1] - prices[0]);
+            dp[1][1] = Math.max(-prices[0], -prices[1]);
+        }
+
+        for(int i = 2; i < len; i++){
+            dp[i][0] = Math.max(dp[i-1][0], dp[i-1][1] + prices[i]);
+            //第 i 天选择 buy 的时候，要从 i-2 的状态转移，而不是 i-1 因为包含了冷冻期
+            dp[i][1] = Math.max(dp[i-1][1], dp[i-2][0] - prices[i]);
+        }
+
+        return dp[len-1][0];
+    }
+
+    //K为正无穷，没用了。Fee要在状态转移中体现
+    public int maxProfit(int[] prices, int fee) {
+        int len = prices.length;
+        int[][] dp = new int[len][2];
+        dp[0][0] = 0;
+        dp[0][1] = -prices[0] - fee;
+
+        for(int i = 1; i < len; i++){
+            dp[i][0] = Math.max(dp[i-1][0], dp[i-1][1] + prices[i]);
+            dp[i][1] = Math.max(dp[i-1][1], dp[i-1][0] - prices[i] - fee);
+        }
+
+        return dp[len-1][0];
+    }
+
+    //最多买2次，此时要考虑K
+    public int maxProfit_4(int[] prices) {
+        int max_k = 2, len = prices.length;
+        int[][][] dp = new int[len][max_k + 1][2];
+        for(int i = 0; i <= max_k; i++){
+            dp[0][i][0] = 0;
+            dp[0][i][1] = -prices[0];
+        }
+
+        for(int i = 1; i < len; i++){
+            for(int k = 1; k <= max_k; k++){
+                //解释：今天我没有持有股票，有两种可能，我从这两种可能中求最大利润：
+                //1、我昨天就没有持有，且截至昨天最大交易次数限制为 k；然后我今天选择 rest，所以我今天还是没有持有，最大交易次数限制依然为 k。
+                //2、我昨天持有股票，且截至昨天最大交易次数限制为 k；但是今天我 sell 了，所以我今天没有持有股票了，最大交易次数限制依然为 k。
+                dp[i][k][0] = Math.max(dp[i-1][k][0], dp[i-1][k][1] + prices[i]);
+
+                //解释：今天我持有着股票，最大交易次数限制为 k，那么对于昨天来说，有两种可能，我从这两种可能中求最大利润：
+                //1、我昨天就持有着股票，且截至昨天最大交易次数限制为 k；然后今天选择 rest，所以我今天还持有着股票，最大交易次数限制依然为 k。
+                //2、我昨天本没有持有，且截至昨天最大交易次数限制为 k - 1；但今天我选择 buy，所以今天我就持有股票了，最大交易次数限制为 k
+                dp[i][k][1] = Math.max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i]);
+            }
+        }
+
+        return dp[len-1][max_k][0];
+    }
+
+    //与上一题类似,只不过K变成了指定的
+    public int maxProfit(int ktmp, int[] prices) {
+        int max_k = ktmp, len = prices.length;
+        int[][][] dp = new int[len][max_k + 1][2];
+        for(int i = 0; i <= max_k; i++){
+            dp[0][i][0] = 0;
+            dp[0][i][1] = -prices[0];
+        }
+
+        for(int i = 1; i < len; i++){
+            for(int k = 1; k <= max_k; k++){
+                //解释：今天我没有持有股票，有两种可能，我从这两种可能中求最大利润：
+                //1、我昨天就没有持有，且截至昨天最大交易次数限制为 k；然后我今天选择 rest，所以我今天还是没有持有，最大交易次数限制依然为 k。
+                //2、我昨天持有股票，且截至昨天最大交易次数限制为 k；但是今天我 sell 了，所以我今天没有持有股票了，最大交易次数限制依然为 k。
+                dp[i][k][0] = Math.max(dp[i-1][k][0], dp[i-1][k][1] + prices[i]);
+
+                //解释：今天我持有着股票，最大交易次数限制为 k，那么对于昨天来说，有两种可能，我从这两种可能中求最大利润：
+                //1、我昨天就持有着股票，且截至昨天最大交易次数限制为 k；然后今天选择 rest，所以我今天还持有着股票，最大交易次数限制依然为 k。
+                //2、我昨天本没有持有，且截至昨天最大交易次数限制为 k - 1；但今天我选择 buy，所以今天我就持有股票了，最大交易次数限制为 k
+                dp[i][k][1] = Math.max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i]);
+            }
+        }
+
+        return dp[len-1][max_k][0];
+
+    }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
