@@ -4,10 +4,13 @@ import java.util.*;
 public class test {
 
     public static void main(String[] args){
-        int INITIAL_CAPACITY = 2;
-        Solution solution = new Solution();
+        List<Integer> re = new ArrayList<>();
+        re.add(1);
+        re.add(2);
+        re.add(3);
+        re.add(4);
 
-
+        re.stream().filter(a -> a%2 == 0).forEach(System.out::println);
     }
 
 
