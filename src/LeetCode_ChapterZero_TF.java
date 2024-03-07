@@ -166,7 +166,212 @@ class LinkedListAlgorithms_TF{
 }
 
 class ArrayAlgorithms_TF{
+    //我们让慢指针 slow 走在后面，快指针 fast 走在前面探路，找到一个不重复的元素就赋值给 slow 并让 slow 前进一步
+    public int removeDuplicates(int[] nums) {
+        int slow = 0, fast = 0;
 
+        while(fast < nums.length){
+            if(nums[slow] != nums[fast]){
+                slow++;
+                nums[slow] = nums[fast];
+            }
+
+            fast++;
+        }
+
+        return slow + 1;
+    }
+
+    //same logic as above
+    public ListNode deleteDuplicates(ListNode head) {
+        if(head == null) return null;
+        ListNode slow = head, fast = head;
+
+        while(fast != null){
+            if(slow.val != fast.val){
+                slow.next = fast;
+                slow = slow.next;
+            }
+
+            fast = fast.next;
+        }
+
+        slow.next = null;
+        return head;
+    }
+
+    //如果 fast 遇到值为 val 的元素，则直接跳过，否则就赋值给 slow 指针，并让 slow 前进一步。
+    public int removeElement(int[] nums, int val) {
+        int slow = 0, fast = 0;
+
+        while(fast < nums.length){
+            if(nums[fast] != val){
+                nums[slow] = nums[fast];
+                slow++;
+            }
+            fast++;
+        }
+
+        return slow;
+    }
+
+
+    //题目让我们将所有 0 移到最后，其实就相当于移除 nums 中的所有 0，然后再把后面的元素都赋值为 0 即可。
+    public void moveZeroes(int[] nums) {
+        int slow = 0, fast = 0;
+
+        while(fast < nums.length){
+            if(nums[fast] != 0){
+                nums[slow] = nums[fast];
+                slow++;
+            }
+            fast++;
+        }
+
+        for(; slow < nums.length; slow++){
+            nums[slow] = 0;
+        }
+    }
+
+    public int[] twoSum(int[] numbers, int target) {
+        int left = 0, right = numbers.length - 1;
+        while (left < right){
+            if(numbers[left] + numbers[right] == target){
+                return new int[]{left+1, right+1};
+            }
+            else if(numbers[left] + numbers[right] < target) left++;
+            else right--;
+        }
+
+        return new int[]{-1,-1};
+    }
+
+    public String longestPalindrome(String s) {
+        String res = "";
+
+        for(int i = 0; i < s.length(); i++){
+            String tmp1 = longestPalindrome_help(s,i,i);
+            String tmp2 = longestPalindrome_help(s,i,i+1);
+
+            res = res.length() < tmp1.length() ? tmp1 : res;
+            res = res.length() < tmp2.length() ? tmp2 : res;
+        }
+
+        return res;
+    }
+    public String longestPalindrome_help(String s, int l, int r){
+        while(l >=0 && r < s.length() && s.charAt(l) == s.charAt(r)){
+            l--;
+            r++;
+        }
+
+        return s.substring(l+1, r);
+    }
+
+}
+
+class BinaryTreeAlgorithms_TF{
+    int depth = 0;
+    int res = 0;
+    //遍历一遍二叉树，用一个外部变量记录每个节点所在的深度，取最大值就可以得到最大深度，这就是遍历二叉树计算答案的思路。
+    int longestPath = 0;
+    public int maxDepth(TreeNode root) {
+        maxDepth_traverse(root);
+        return res;
+    }
+    void maxDepth_traverse(TreeNode root) {
+        if (root == null) {
+            return;
+        }
+        // 前序位置
+        depth++;
+        if (root.left == null && root.right == null) {
+            // 到达叶子节点，更新最大深度
+            res = Math.max(res, depth);
+        }
+        maxDepth_traverse(root.left);
+        maxDepth_traverse(root.right);
+        // 后序位置
+        depth--;
+    }
+
+    //分解思路：由子问题推导出问题
+    public int maxDepth2(TreeNode root) {
+        if(root == null) return 0;
+
+        int left = maxDepth2(root.left);
+        int right = maxDepth2(root.right);
+
+        return Math.max(left, right) + 1;
+    }
+
+    //每一条二叉树的「直径」长度，就是一个节点的左右子树的最大深度之和。
+    //通过后续遍历，基于左右子树最大深度 得到当前节点直径长度 traverse求解
+    public int diameterOfBinaryTree(TreeNode root) {
+        diameterOfBinaryTree_traverse(root);
+
+        return longestPath;
+    }
+    int diameterOfBinaryTree_traverse(TreeNode root){
+        if(root == null) return 0;
+
+        int left = diameterOfBinaryTree_traverse(root.left);
+        int right = diameterOfBinaryTree_traverse(root.right);
+
+        int currtMax = left + right;
+        longestPath = Math.max(currtMax, longestPath);
+
+        return 1 + Math.max(left, right);
+    }
+
+    public List<Integer> preorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        preorderTraversal_help(root, res);
+        return res;
+    }
+    void preorderTraversal_help(TreeNode root, List<Integer> res){
+        if(root == null) return;
+
+        res.add(root.val);
+        preorderTraversal_help(root.left, res);
+        preorderTraversal_help(root.right, res);
+    }
+}
+
+class dpAlgorithms_TF{
+    public int fib(int n) {
+        if (n == 0) return 0;
+        int[] dp = new int[n + 1];
+        // base case
+        dp[0] = 0; dp[1] = 1;
+        // 状态转移
+        for (int i = 2; i <= n; i++) {
+            dp[i] = dp[i - 1] + dp[i - 2];
+        }
+
+        return dp[n];
+    }
+
+    public int coinChange(int[] coins, int amount) {
+        int[] dp = new int[amount + 1];
+        // 数组大小为 amount + 1，初始值也为 amount + 1
+        Arrays.fill(dp, amount + 1);
+
+        dp[0] = 0;
+        for(int i  = 1; i <= amount; i++){
+            for(int coin : coins){
+                if(i - coin < 0) continue;
+
+                dp[i] = Math.min(dp[i], dp[i-coin] + 1);
+            }
+        }
+
+        return (dp[amount] == amount + 1) ? -1 : dp[amount];
+
+    }
+}
+
+class backtrackAlgorithms{
 
 }
 
