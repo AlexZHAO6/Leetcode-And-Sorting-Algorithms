@@ -372,6 +372,140 @@ class dpAlgorithms_TF{
 }
 
 class backtrackAlgorithms{
+    List<List<Integer>> res_permute = new LinkedList<>();
+    List<List<String>> res_Nqueues = new ArrayList<>();
+    public List<List<Integer>> permute(int[] nums) {
+        LinkedList<Integer> track = new LinkedList<>();
+        // 「路径」中的元素会被标记为 true，避免重复使用
+        boolean[] used = new boolean[nums.length];
+
+        backtrack_permute(nums, track, used);
+        return res_permute;
+    }
+    void backtrack_permute(int[] nums, LinkedList<Integer> track,  boolean[] used){
+        if(track.size() == nums.length){
+            res_permute.add(new ArrayList<>(track));
+            return;
+        }
+
+        for(int i = 0; i < nums.length; i++){
+            if(used[i]) continue;
+
+            //make choice
+            used[i] = true;
+            track.add(nums[i]);
+
+            //move to the next level of the decision tree
+            backtrack_permute(nums, track, used);
+
+            //cancel the choice
+            used[i] = false;
+            track.removeLast();
+        }
+    }
+
+
+    public List<List<String>> solveNQueens(int n) {
+        List<String> board = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            StringBuilder sb = new StringBuilder();
+            for (int j = 0; j < n; j++) {
+                sb.append('.');
+            }
+            board.add(sb.toString());
+        }
+        backtrack_nQueues(board, 0);
+        return res_Nqueues;
+    }
+    void backtrack_nQueues(List<String> board, int row){
+        if(row == board.size()){
+            res_Nqueues.add(new ArrayList<>(board));
+            return;
+        }
+
+        int n = board.get(row).length();
+        for(int col = 0; col < n; col++){
+            if(!isValid(board, row, col)) continue;
+
+            StringBuilder sb = new StringBuilder(board.get(row));
+            sb.setCharAt(col, 'Q');
+            board.set(row, sb.toString());
+
+            backtrack_nQueues(board, row+1);
+
+            sb.setCharAt(col, '.');
+            board.set(row, sb.toString());
+        }
+    }
+    /* 是否可以在 board[row][col] 放置皇后？ */
+    boolean isValid(List<String> board, int row, int col) {
+        int n = board.size();
+        // 检查列是否有皇后互相冲突
+        for (int i = 0; i <= row; i++) {
+            if (board.get(i).charAt(col) == 'Q')
+                return false;
+        }
+        // 检查右上方是否有皇后互相冲突
+        for (int i = row - 1, j = col + 1;
+             i >= 0 && j < n; i--, j++) {
+            if (board.get(i).charAt(j) == 'Q')
+                return false;
+        }
+        // 检查左上方是否有皇后互相冲突
+        for (int i = row - 1, j = col - 1;
+             i >= 0 && j >= 0; i--, j--) {
+            if (board.get(i).charAt(j) == 'Q')
+                return false;
+        }
+        return true;
+    }
+
+
+    public List<List<Integer>> subsets(int[] nums) {
+        List<List<Integer>> res = new LinkedList<>();
+        LinkedList<Integer> track = new LinkedList<>();
+
+        backtrack_subsets(res, track, nums, 0);
+
+        return res;
+    }
+    void backtrack_subsets(List<List<Integer>> res, LinkedList<Integer> track, int[] nums, int start) {
+        res.add(new ArrayList<>(track));
+
+        //使用 start 参数控制树枝的生长避免产生重复的子集
+        for(int i = start; i < nums.length; i++){
+            track.add(nums[i]);
+
+            backtrack_subsets(res, track, nums, i+1);
+
+            track.removeLast();
+        }
+    }
+
+
+    public List<List<Integer>> combine(int n, int k) {
+        List<List<Integer>> res = new LinkedList<>();
+        LinkedList<Integer> track = new LinkedList<>();
+
+        backtrack_combine(res, track, n, k, 1);
+
+        return res;
+    }
+    void backtrack_combine(List<List<Integer>> res, LinkedList<Integer> track, int n, int k, int start) {
+        if(k == track.size()){
+            res.add(new ArrayList<>(track));
+            return;
+        }
+
+        //使用 start 参数控制树枝的生长避免产生重复的子集
+        for(int i = start; i <= n; i++){
+            track.add(i);
+
+            backtrack_combine(res, track, n, k, i+1);
+
+            track.removeLast();
+        }
+    }
 
 }
 
