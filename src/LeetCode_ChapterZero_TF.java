@@ -5,6 +5,11 @@ public class LeetCode_ChapterZero_TF {
         LinkedListAlgorithms_TF linkedListAlgorithms = new LinkedListAlgorithms_TF();
         ArrayAlgorithms_TF arrayAlgorithmsTf = new ArrayAlgorithms_TF();
 
+        BFSAlgorithms bfsAlgorithms = new BFSAlgorithms();
+        String[] tmp = {"0201","0101","0102","1212","2002"};
+        String target = "0202";
+        System.out.println(bfsAlgorithms.openLock(tmp, target));
+
     }
 
 }
@@ -338,7 +343,7 @@ class BinaryTreeAlgorithms_TF{
     }
 }
 
-class dpAlgorithms_TF{
+class DPAlgorithms_TF{
     public int fib(int n) {
         if (n == 0) return 0;
         int[] dp = new int[n + 1];
@@ -371,7 +376,7 @@ class dpAlgorithms_TF{
     }
 }
 
-class backtrackAlgorithms{
+class BacktrackAlgorithms{
     List<List<Integer>> res_permute = new LinkedList<>();
     List<List<String>> res_Nqueues = new ArrayList<>();
     public List<List<Integer>> permute(int[] nums) {
@@ -507,6 +512,275 @@ class backtrackAlgorithms{
         }
     }
 
+
+    public List<List<Integer>> subsetsWithDup(int[] nums) {
+        List<List<Integer>> res = new LinkedList<>();
+        LinkedList<Integer> track = new LinkedList<>();
+        Arrays.sort(nums);
+
+        backtrack_subsetsWithDup(res, track, nums, 0);
+
+        return res;
+    }
+    void backtrack_subsetsWithDup(List<List<Integer>> res, LinkedList<Integer> track, int[] nums, int start) {
+        res.add(new ArrayList<>(track));
+
+        for(int i = start; i < nums.length; i++){
+            if (i > start && nums[i] == nums[i - 1]) {
+                continue;
+            }
+            track.addLast(nums[i]);
+            backtrack_subsetsWithDup(res, track, nums, i + 1);
+            track.removeLast();
+        }
+    }
+
+
+    public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+        List<List<Integer>> res = new LinkedList<>();
+        LinkedList<Integer> track = new LinkedList<>();
+        Arrays.sort(candidates);
+
+        backtrack_combinationSum2(res, track, candidates, 0, 0, target);
+        return res;
+    }
+    void backtrack_combinationSum2(List<List<Integer>> res, LinkedList<Integer> track, int[] candidates,
+                                   int start, int trackNum, int target)
+    {
+        if(trackNum == target){
+            res.add(new ArrayList<>(track));
+            return;
+        }
+
+        if(trackNum > target) return;
+
+        for(int i = start; i < candidates.length; i++){
+            if (i > start && candidates[i] == candidates[i - 1]) {
+                continue;
+            }
+            track.addLast(candidates[i]);
+            trackNum += candidates[i];
+            backtrack_combinationSum2(res, track, candidates, i+1, trackNum, target);
+            track.removeLast();
+            trackNum -= candidates[i];
+        }
+    }
+
+    public List<List<Integer>> permuteUnique(int[] nums) {
+        List<List<Integer>> res_permute = new LinkedList<>();
+        LinkedList<Integer> track = new LinkedList<>();
+        boolean[] used = new boolean[nums.length];
+        Arrays.sort(nums);
+        backtrack_permuteUnique(nums, res_permute, track, used);
+
+        return res_permute;
+    }
+    void backtrack_permuteUnique(int[] nums, List<List<Integer>> res_permute, LinkedList<Integer> track,  boolean[] used){
+        if(track.size() == nums.length){
+            res_permute.add(new ArrayList<>(track));
+            return;
+        }
+
+        for(int i = 0; i < nums.length; i++){
+            if(used[i]) continue;
+
+            // 新添加的剪枝逻辑，固定相同的元素在排列中的相对位置
+            //当出现重复元素时，比如输入 nums = [1,2,2',2'']，
+            // 2' 只有在 2 已经被使用的情况下才会被选择，同理，
+            // 2'' 只有在 2' 已经被使用的情况下才会被选择，这就保证了相同元素在排列中的相对位置保证固定。
+            if(i > 0 && nums[i] == nums[i-1] && !used[i-1]) continue;
+            //make choice
+            used[i] = true;
+            track.add(nums[i]);
+
+            //move to the next level of the decision tree
+            backtrack_permuteUnique(nums, res_permute, track, used);
+
+            //cancel the choice
+            used[i] = false;
+            track.removeLast();
+        }
+    }
+
+
+    public List<List<Integer>> combinationSum(int[] candidates, int target) {
+        List<List<Integer>> res = new LinkedList<>();
+        LinkedList<Integer> track = new LinkedList<>();
+
+        backtrack_combinationSum(res, track, candidates, 0, 0, target);
+        return res;
+    }
+    void backtrack_combinationSum(List<List<Integer>> res, LinkedList<Integer> track, int[] candidates,
+                                  int start, int trackNum, int target) {
+        if(trackNum == target){
+            res.add(new ArrayList<>(track));
+            return;
+        }
+        if(trackNum > target) return;
+
+        for(int i = start; i < candidates.length; i++){
+            track.add(candidates[i]);
+            trackNum += candidates[i];
+            // 同一元素可重复使用，注意参数 i not i+1!!!
+            backtrack_combinationSum(res, track, candidates, i, trackNum, target);
+
+            track.removeLast();
+            trackNum -= candidates[i];
+        }
+    }
+
+}
+
+class BFSAlgorithms{
+    public int minDepth(TreeNode root) {
+        if (root == null) return 0;
+        Queue<TreeNode> q = new LinkedList<>();
+        q.offer(root);
+
+        int depth = 1;
+        while(!q.isEmpty()){
+            int size = q.size();
+            for(int i = 0; i < size; i++){
+                TreeNode cur = q.poll();
+                if(cur.left == null && cur.right == null) return depth;
+
+                if (cur.left != null)
+                    q.offer(cur.left);
+                if (cur.right != null)
+                    q.offer(cur.right);
+            }
+            depth++;
+        }
+
+        return depth;
+    }
+
+    public int openLock(String[] deadends, String target) {
+        // 记录需要跳过的死亡密码
+        Set<String> deads = new HashSet<>();
+        for (String s : deadends) deads.add(s);
+        // 记录已经穷举过的密码，防止走回头路
+        Set<String> visited = new HashSet<>();
+        Queue<String> q = new LinkedList<>();
+        // 从起点开始启动广度优先搜索
+
+        int step = 0;
+        q.offer("0000");
+        visited.add("0000");
+
+        while(!q.isEmpty()){
+            int sz = q.size();
+            /* 将当前队列中的所有节点向周围扩散  !!! significant!!*/
+            for(int i = 0; i < sz; i++){
+                String cur = q.poll();
+                if(deads.contains(cur)) continue;
+                if(cur.equals(target)) return step;
+
+                for(int j = 0; j < 4; j++){
+                    String up = plusOne(cur, j);
+                    if (!visited.contains(up)) {
+                        q.offer(up);
+                        visited.add(up);
+                    }
+                    String down = minusOne(cur, j);
+                    if (!visited.contains(down)) {
+                        q.offer(down);
+                        visited.add(down);
+                    }
+                }
+            }
+            step++;
+
+        }
+        return -1;
+    }
+    String plusOne(String s, int j) {
+        char[] ch = s.toCharArray();
+        if (ch[j] == '9')
+            ch[j] = '0';
+        else
+            ch[j] += 1;
+        return new String(ch);
+    }
+    // 将 s[i] 向下拨动一次
+    String minusOne(String s, int j) {
+        char[] ch = s.toCharArray();
+        if (ch[j] == '0')
+            ch[j] = '9';
+        else
+            ch[j] -= 1;
+        return new String(ch);
+    }
+}
+
+class BinarySearchAlgorithms{
+    public int search(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length - 1; // 注意
+
+        while(left <= right) {
+            int mid = left + (right - left) / 2;
+            if(nums[mid] == target)
+                return mid;
+            else if (nums[mid] < target)
+                left = mid + 1; // 注意
+            else if (nums[mid] > target)
+                right = mid - 1; // 注意
+        }
+        return -1;
+    }
+
+    public int[] searchRange(int[] nums, int target) {
+        return new int[]{left_bound(nums, target), right_bound(nums, target)};
+    }
+    int left_bound(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] < target) {
+                left = mid + 1;
+            } else if (nums[mid] > target) {
+                right = mid - 1;
+            } else if (nums[mid] == target) {
+                // 别返回，右侧边界收缩 为了锁定左侧边界
+                right = mid - 1;
+            }
+        }
+        // 判断 target 是否存在于 nums 中
+        if (left < 0 || left >= nums.length) {
+            return -1;
+        }
+        // 判断一下 nums[left] 是不是 target
+        return nums[left] == target ? left : -1;
+    }
+    int right_bound(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] < target) {
+                left = mid + 1;
+            } else if (nums[mid] > target) {
+                right = mid - 1;
+            } else if (nums[mid] == target) {
+                // 别返回，左侧边界收缩 为了锁定右侧边界
+                left = mid + 1;
+            }
+        }
+
+        // 由于 while 的结束条件是 right == left - 1，且现在在求右边界
+        // 所以用 right 替代 left - 1 更好记
+        if (right < 0 || right >= nums.length) {
+            return -1;
+        }
+        return nums[right] == target ? right : -1;
+    }
+
+}
+
+class SlidingWindowAlgorithms{
+    public String minWindow(String s, String t) {
+
+    }
 }
 
 
