@@ -778,10 +778,156 @@ class BinarySearchAlgorithms{
 }
 
 class SlidingWindowAlgorithms{
+    // 遇到子数组/子串相关的问题，你只要能回答出来以下几个问题，就能运用滑动窗口算法：
+    //
+    //1、什么时候应该扩大窗口？
+    //
+    //2、什么时候应该缩小窗口？
+    //
+    //3、什么时候应该更新答案？
     public String minWindow(String s, String t) {
+        Map<Character, Integer> need = new HashMap<>();
+        Map<Character, Integer> window = new HashMap<>();
+        // 统计 t 中各字符出现次数
+        for (char c : t.toCharArray())
+            need.put(c, need.getOrDefault(c, 0) + 1);
 
+        int left = 0, right = 0;
+        int valid = 0; // 窗口中满足需要的字符个数
+        // 记录最小覆盖子串的起始索引及长度
+        int start = 0, len = Integer.MAX_VALUE;
+
+        while(right < s.length()){
+            char tmp = s.charAt(right);
+            right++;
+
+            if(need.containsKey(tmp)){
+                window.put(tmp, window.getOrDefault(tmp, 0) + 1);
+                if(window.get(tmp).equals(need.get(tmp))) valid++;
+            }
+
+            while (valid == need.size()){
+                if(right - left < len){
+                    start = left;
+                    len = right - left;
+                }
+
+                char tmpl = s.charAt(left);
+                left++;
+
+                if(window.containsKey(tmpl)){
+                    if(window.get(tmpl).equals(need.get(tmpl))) valid--;
+                    window.put(tmpl, window.get(tmpl) - 1);
+                }
+
+            }
+
+
+        }
+        // 返回最小覆盖子串
+        return len == Integer.MAX_VALUE ?
+                "" : s.substring(start, start + len);
+    }
+
+
+    public boolean checkInclusion(String s1, String s2) {
+        HashMap<Character, Integer> need = new HashMap<>();
+        HashMap<Character, Integer> window = new HashMap<>();
+        for (int i = 0; i < s1.length(); i++) {
+            char c = s1.charAt(i);
+            need.put(c, need.getOrDefault(c, 0) + 1);
+        }
+
+        int left = 0, right = 0;
+        int valid = 0;
+        while(right < s2.length()){
+            char c = s2.charAt(right);
+            right++;
+
+            if(need.containsKey(c)){
+                window.put(c, window.getOrDefault(c, 0) + 1);
+                if(window.get(c).equals(need.get(c))) valid++;
+            }
+
+            while(right - left == s1.length()){
+                if(valid == need.size()) return true;
+
+                char d = s2.charAt(left);
+                left++;
+                if(window.containsKey(d)){
+                    if(window.get(d).equals(need.get(d))) valid--;
+                    window.put(d, window.get(d) - 1);
+                }
+            }
+        }
+
+        return false;
+    }
+
+
+    public List<Integer> findAnagrams(String s, String p) {
+        HashMap<Character, Integer> need = new HashMap<>();
+        HashMap<Character, Integer> window = new HashMap<>();
+        List<Integer> res = new ArrayList<>();
+        for (int i = 0; i < p.length(); i++) {
+            char c = p.charAt(i);
+            need.put(c, need.getOrDefault(c, 0) + 1);
+        }
+
+        int left = 0, right = 0;
+        int valid = 0;
+        while(right < s.length()){
+            char c = s.charAt(right);
+            right++;
+
+            if(need.containsKey(c)){
+                window.put(c, window.getOrDefault(c, 0) + 1);
+                if(window.get(c).equals(need.get(c))) valid++;
+            }
+
+            while(right - left == p.length()){
+                if(valid == need.size()){
+                    res.add(left);
+                }
+
+                char d = s.charAt(left);
+                left++;
+                if(window.containsKey(d)){
+                    if(window.get(d).equals(need.get(d))) valid--;
+                    window.put(d, window.get(d) - 1);
+                }
+            }
+        }
+
+        return res;
+    }
+
+    public int lengthOfLongestSubstring(String s) {
+        Map<Character, Integer> window = new HashMap<>();
+
+        int left = 0, right = 0;
+        int res = 0;
+        while(right < s.length()){
+            char c = s.charAt(right);
+            right++;
+
+            window.put(c, window.getOrDefault(c, 0) + 1);
+
+            while(window.get(c) > 1){
+                char d = s.charAt(left);
+                left++;
+                window.put(d, window.get(d) - 1);
+            }
+
+            res = Math.max(res, right - left);
+        }
+
+        return res;
     }
 }
+
+
+
 
 
 

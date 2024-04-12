@@ -5617,6 +5617,123 @@ class leetcode{
 
         return false;
     }
+
+
+
+
+
+
+
+//  new -- 2024
+    public int numDecodings_2024(String s) {
+        int n = s.length();
+        int[] dp = new int[n + 1];
+        dp[0] = 1;
+
+        for(int i = 1; i <= n; i++){
+            if(s.charAt(i - 1) != '0') dp[i] += dp[i-1];
+
+            if(i > 1 && s.charAt(i-2) != '0' && ((s.charAt(i - 2) - '0') * 10 + (s.charAt(i - 1) - '0') <= 26))
+                dp[i] += dp[i-2];
+        }
+
+        return dp[n];
+    }
+
+
+    public List<String> letterCombinations_2024(String digits) {
+        List<String> combinations = new ArrayList<String>();
+        if (digits.length() == 0) {
+            return combinations;
+        }
+        Map<Character, String> phoneMap = new HashMap<Character, String>() {{
+            put('2', "abc");
+            put('3', "def");
+            put('4', "ghi");
+            put('5', "jkl");
+            put('6', "mno");
+            put('7', "pqrs");
+            put('8', "tuv");
+            put('9', "wxyz");
+        }};
+
+        StringBuilder res = new StringBuilder();
+        letterCombinations_backtrack(combinations, phoneMap, 0,  res, digits);
+        return combinations;
+    }
+    void letterCombinations_backtrack(List<String> combinations, Map<Character, String> phoneMap, int index, StringBuilder res, String digits)
+    {
+        if(index == digits.length()){
+            combinations.add(new String(res));
+            return;
+        }
+
+        char cur = digits.charAt(index);
+        String curS = phoneMap.get(cur);
+
+        for(int i = 0; i < curS.length(); i++){
+            char tmp = curS.charAt(i);
+            res.append(tmp);
+            letterCombinations_backtrack(combinations, phoneMap, index+1, res, digits);
+            res.deleteCharAt(res.length()-1);
+        }
+    }
+
+    public String validIPAddress_2024(String queryIP) {
+        return isIpv4(queryIP)?"IPv4":isIpv6(queryIP)?"IPv6":"Neither";
+    }
+    boolean isIpv4(String queryIp){
+        String[] res = queryIp.split("\\.", -1);
+        if(res.length != 4) return false;
+
+        for(int i = 0; i < 4; i++){
+            if(res[i].length() == 0 || res[i].length() > 3 || res[i].length() > 1 && res[i].charAt(0) == '0')
+                return false;
+
+            int sum = 0;
+            for(char c:res[i].toCharArray()){
+                if(!(c >= '0' && c<='9')){return false;}
+                sum = sum*10 + (c -'0');
+            }
+            if(sum > 255){return false;}
+        }
+
+        return true;
+    }
+    boolean isIpv6(String queryIp){
+        queryIp = queryIp.toLowerCase();
+        String res[] = queryIp.split(":",-1);
+        if(res.length!=8){return false;}
+        for(int i=0;i<8;i++){
+            if(res[i].length()==0||res[i].length()>4){return false;}
+            for(char c:res[i].toCharArray()){
+                if(!(c>='0'&&c<='9')&&!(c>='a'&&c<='f')) return false;
+            }
+        }
+        return true;
+    }
+
+
+    public List<String> restoreIpAddresses(String s) {
+        int len = s.length();
+        List<String> res = new ArrayList<>();
+        // 如果长度不够，不搜索
+        if (len < 4 || len > 12) {
+            return res;
+        }
+
+        Deque<String> path = new ArrayDeque<>(4);
+        int split = 0;
+        restoreIpAddresses_backtrack(s, len, split, 0, path, res);
+        return res;
+
+    }
+    private void restoreIpAddresses_backtrack(String s, int len, int split, int start, Deque<String> path, List<String> res)
+    {
+
+
+    }
+
 }
 
 // Definition for a Node with random point.
