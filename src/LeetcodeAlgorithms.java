@@ -4,6 +4,7 @@ public class LeetcodeAlgorithms {
 
     public static void main(String[] args){
         leetcode testclass = new leetcode();
+        testclass.calculate_2024("3+5 / 2");
     }
 }
 
@@ -5722,18 +5723,418 @@ class leetcode{
             return res;
         }
 
-        Deque<String> path = new ArrayDeque<>(4);
-        int split = 0;
-        restoreIpAddresses_backtrack(s, len, split, 0, path, res);
+        List<String> path = new ArrayList<>(4);
+        restoreIpAddresses_backtrack(s, len, 0, 0, path, res);
         return res;
 
     }
-    private void restoreIpAddresses_backtrack(String s, int len, int split, int start, Deque<String> path, List<String> res)
+    /**
+     * 判断 s 的子区间 [left, right] 是否能够成为一个 ip 段
+     * 判断的同时顺便把类型转了
+     */
+    private int judgeIfIpSegment(String s, int left, int right) {
+        int len = right - left + 1;
+
+        // 大于 1 位的时候，不能以 0 开头
+        if (len > 1 && s.charAt(left) == '0') {
+            return -1;
+        }
+
+        // 转成 int 类型
+        int res = 0;
+        for (int i = left; i <= right; i++) {
+            res = res * 10 + s.charAt(i) - '0';
+        }
+
+        if (res > 255) {
+            return -1;
+        }
+        return res;
+    }
+    private void restoreIpAddresses_backtrack(String s, int len, int split, int start, List<String> path, List<String> res)
     {
+        if(start == len && split == 4){
+            res.add(String.join(".", path));
+            return;
+        }
 
+        if (len - start < (4 - split) || len - start > 3 * (4 - split)) {
+            return;
+        }
 
+        for(int i = 0; i < 3; i++){
+            if(start + i >= len) break;
+
+            int ipSegment = judgeIfIpSegment(s, start, start + i);
+            if(ipSegment != -1){
+                path.add(ipSegment + "");
+                restoreIpAddresses_backtrack(s, len, split + 1, start + i + 1, path, res);
+                path.remove(path.size()-1);
+            }
+        }
     }
 
+    public void merge(int[] nums1, int m, int[] nums2, int n) {
+        int p1 = 0, p2 = 0;
+
+        int[] sorted = new int[m + n];
+        int index = 0;
+        while(p1 < m && p2 < n){
+            if(nums1[p1] <= nums2[p2]){
+                sorted[index] = nums1[p1];
+                p1++;
+                index++;
+            }
+            else {
+                sorted[index] = nums2[p2];
+                p2++;
+                index++;
+
+            }
+        }
+        while (p1 < m){
+            sorted[index] = nums1[p1];
+            p1++;
+            index++;
+        }
+        while(p2 < n){
+            sorted[index] = nums2[p2];
+            p2++;
+            index++;
+        }
+
+        for (int i = 0; i < m + n; ++i) {
+            nums1[i] = sorted[i];
+        }
+    }
+
+
+    public int[][] merge_2024(int[][] intervals) {
+        if (intervals.length == 0) {
+            return new int[0][2];
+        }
+        Arrays.sort(intervals, new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                return o1[0] - o2[0];
+            }
+        });
+        List<int[]> merged = new ArrayList<int[]>();
+
+        for(int i = 0; i < intervals.length; i++){
+            int left = intervals[i][0], right = intervals[i][1];
+            if(merged.size() == 0 || merged.get(merged.size() - 1)[1] < left){
+                merged.add(new int[]{left, right});
+            }
+
+            else {
+                merged.get(merged.size() - 1)[1] = Math.max(merged.get(merged.size() - 1)[1], right);
+            }
+        }
+
+        return merged.toArray(new int[merged.size()][]);
+    }
+
+    public int uniquePaths_2024(int m, int n) {
+        int[][] dp = new int[m][n];
+        for (int i = 0; i < m; ++i) {
+            dp[i][0] = 1;
+        }
+        for (int j = 0; j < n; ++j) {
+            dp[0][j] = 1;
+        }
+
+        for(int i = 1; i < m; i++){
+            for(int j = 1; j < n; j++){
+                dp[i][j] = dp[i-1][j] + dp[i][j-1];
+            }
+        }
+
+        return dp[m-1][n-1];
+    }
+
+    public int shortestPathBinaryMatrix(int[][] grid) {
+        if (grid[0][0] == 1) {
+            return -1;
+        }
+        int n = grid.length;
+        int[][] dist = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(dist[i], Integer.MAX_VALUE);
+        }
+
+        Queue<int[]> queue = new ArrayDeque<int[]>();
+
+        queue.offer(new int[]{0, 0});
+        dist[0][0] = 1;
+
+        while(!queue.isEmpty()){
+            int[] tmp = queue.poll();
+            int x = tmp[0], y = tmp[1];
+
+            if(x == n - 1 && y == n - 1){
+                return dist[x][y];
+            }
+
+            for(int dx = -1; dx < 2; dx++){
+                for(int dy = -1; dy < 2; dy++){
+                    if (x + dx < 0 || x + dx >= n || y + dy < 0 || y + dy >= n) {
+                        // 越界
+                        continue;
+                    }
+                    if (grid[x + dx][y + dy] == 1 || dist[x + dx][y + dy] != Integer.MAX_VALUE ) {
+                        // 单元格值不为 0 或已被访问
+                        continue;
+                    }
+
+                    dist[x+dx][y+dy] = dist[x][y] + 1;
+                    queue.offer(new int[]{x+dx, y+dy});
+                }
+            }
+        }
+        return -1;
+    }
+
+    public boolean isConvex(List<List<Integer>> points) {
+        int n = points.size();
+        if(n==3){
+            return true;
+        }
+        int temp = 0;
+        for(int i = 0; i < n; i++){
+            int x1 = points.get((i+1)%n).get(0)-points.get(i).get(0);
+            int y1 = points.get((i+1)%n).get(1)-points.get(i).get(1);
+            int x2 = points.get((i+2)%n).get(0)-points.get((i+1)%n).get(0);
+            int y2 = points.get((i+2)%n).get(1)-points.get((i+1)%n).get(1);
+            if(temp==0){
+                temp = x1*y2-x2*y1;
+            }
+            else if(temp < 0 && x1*y2-x2*y1>0 || (temp > 0 && x1*y2-x2*y1 < 0)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public int calculate_2024(String s) {
+        Stack<Integer> stack = new Stack<>();
+        int len = s.length();
+        char preSign = '+';
+
+        int num = 0;
+        for(int i = 0; i < len; i++){
+            if(Character.isDigit(s.charAt(i))){
+                num = num * 10 + s.charAt(i) - '0';
+            }
+            if(!Character.isDigit(s.charAt(i)) && s.charAt(i) != ' ' || i == len -1){
+                switch (preSign){
+                    case '+' :
+                        stack.push(num);
+                        break;
+
+                    case '-' :
+                        stack.push(-num);
+                        break;
+
+                    case '*' :
+                        stack.push(stack.pop() * num);
+                        break;
+
+                    default :
+                        stack.push(stack.pop() / num);
+                        break;
+                }
+                preSign = s.charAt(i);
+                num = 0;
+            }
+        }
+
+        int res = 0;
+        while(!stack.isEmpty()){
+            res += stack.pop();
+        }
+
+        return res;
+    }
+
+    public int getNumberOfBacklogOrders(int[][] orders) {
+        final int MOD = 1000000007;
+        PriorityQueue<int[]> buyOrders = new PriorityQueue<int[]>((a, b) -> b[0] - a[0]);
+        PriorityQueue<int[]> sellOrders = new PriorityQueue<int[]>((a, b) -> a[0] - b[0]);
+
+        for(int[] order : orders){
+            int price = order[0], amount = order[1], orderType = order[2];
+            if(orderType == 0){
+                while (amount > 0 && !sellOrders.isEmpty() && sellOrders.peek()[0] <= price){
+                    int[] sellOrder = sellOrders.poll();
+                    int sellAmount = Math.min(amount, sellOrder[1]);
+                    amount -= sellAmount;
+                    sellOrder[1] -= sellAmount;
+                    if (sellOrder[1] > 0) {
+                        sellOrders.offer(sellOrder);
+                    }
+                }
+
+                if (amount > 0) {
+                    buyOrders.offer(new int[]{price, amount});
+                }
+            }
+            else {
+                while (amount > 0 && !buyOrders.isEmpty() && buyOrders.peek()[0] >= price){
+                    int[] buyOrder = buyOrders.poll();
+                    int buyAmount = Math.min(amount, buyOrder[1]);
+                    amount -= buyAmount;
+                    buyOrder[1] -= buyAmount;
+                    if(buyOrder[1] > 0) buyOrders.offer(buyOrder);
+                }
+
+                if(amount > 0){
+                    sellOrders.add(new int[]{price, amount});
+                }
+            }
+        }
+
+        int res = 0;
+        while(!buyOrders.isEmpty()){
+            int[] tmp = buyOrders.poll();
+            res = (res + tmp[1]) % MOD;
+        }
+        while(!sellOrders.isEmpty()){
+            int[] tmp = sellOrders.poll();
+            res = (res + tmp[1]) % MOD;
+        }
+        return res;
+    }
+
+
+}
+
+class TicTacToe {
+    int[] rows_one;
+    int[] rows_two;
+    int[] cols_one;
+    int[] cols_two;
+    int diagonal_one;
+    int diagonal_two;
+    int antiDiagonal_one;
+    int antiDiagonal_two;
+
+    public TicTacToe(int n) {
+        rows_one = new int[n];
+        cols_one = new int[n];
+        rows_two = new int[n];
+        cols_two = new int[n];
+    }
+
+    public int move(int row, int col, int player) {
+        int currentPlayer = (player == 1) ? 1 : 2;
+
+        if(currentPlayer == 1){
+            // 更新 rows 和 cols 数组中的当前用户
+            rows_one[row] += 1;
+            cols_one[col] += 1;
+            // 更新 diagonal
+            if (row == col) {
+                diagonal_one += 1;
+            }
+            // 更新 antiDiagonal
+            if (row == (cols_one.length - 1 - col)) {
+                antiDiagonal_one += 1;
+            }
+            int n = rows_one.length;
+            // 检查玩家是否赢得游戏
+            if ((rows_one[row]) == n ||
+                    (cols_one[col]) == n ||
+                    (diagonal_one) == n ||
+                    (antiDiagonal_one) == n) {
+                return player;
+            }
+
+        }else {
+            // 更新 rows 和 cols 数组中的当前用户
+            rows_two[row] += 1;
+            cols_two[col] += 1;
+            // 更新 diagonal
+            if (row == col) {
+                diagonal_two += 1;
+            }
+            // 更新 antiDiagonal
+            if (row == (cols_two.length - 1 - col)) {
+                antiDiagonal_two += 1;
+            }
+            int n = rows_two.length;
+            // 检查玩家是否赢得游戏
+            if ((rows_two[row]) == n ||
+                    (cols_two[col]) == n ||
+                    (diagonal_two) == n ||
+                    (antiDiagonal_two) == n) {
+                return player;
+            }
+
+        }
+
+        // 没有人赢
+        return 0;
+    }
+}
+
+class MouseAndCat {
+    static final int MOUSE_WIN = 1;
+    static final int CAT_WIN = 2;
+    static final int DRAW = 0;
+    int n;
+    int[][] graph;
+    int[][][] dp;
+
+    public int catMouseGame(int[][] graph) {
+        this.n = graph.length;
+        this.graph = graph;
+        this.dp = new int[n][n][2 * n * (n - 1)];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                Arrays.fill(dp[i][j], -1);
+            }
+        }
+        return getResult(1, 2, 0);
+    }
+
+    public int getResult(int mouse, int cat, int turns) {
+        if (turns == 2 * n * (n - 1)) {
+            return DRAW;
+        }
+        if (dp[mouse][cat][turns] < 0) {
+            if (mouse == 0) {
+                dp[mouse][cat][turns] = MOUSE_WIN;
+            } else if (cat == mouse) {
+                dp[mouse][cat][turns] = CAT_WIN;
+            } else {
+                getNextResult(mouse, cat, turns);
+            }
+        }
+        return dp[mouse][cat][turns];
+    }
+
+    public void getNextResult(int mouse, int cat, int turns) {
+        int curMove = turns % 2 == 0 ? mouse : cat;
+        int defaultResult = curMove == mouse ? CAT_WIN : MOUSE_WIN;
+        int result = defaultResult;
+        int[] nextNodes = graph[curMove];
+        for (int next : nextNodes) {
+            if (curMove == cat && next == 0) {
+                continue;
+            }
+            int nextMouse = curMove == mouse ? next : mouse;
+            int nextCat = curMove == cat ? next : cat;
+            int nextResult = getResult(nextMouse, nextCat, turns + 1);
+            if (nextResult != defaultResult) {
+                result = nextResult;
+                if (result != DRAW) {
+                    break;
+                }
+            }
+        }
+        dp[mouse][cat][turns] = result;
+    }
 }
 
 // Definition for a Node with random point.
@@ -5807,5 +6208,8 @@ class TreeNode {
           this.right = right;
       }
 }
+
+
+
 
 

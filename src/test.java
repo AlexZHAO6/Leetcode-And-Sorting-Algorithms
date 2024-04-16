@@ -11,30 +11,25 @@ public class test {
         re.add(4);
 
         re.stream().filter(a -> a%2 == 0).forEach(System.out::println);
+
+        PriorityQueue<Integer> buyOrders = new PriorityQueue<Integer>((a, b) -> b - a);
+        PriorityQueue<Integer> sellOrders = new PriorityQueue<Integer>((a, b) -> a - b);
+        for(int i = 1; i < 4; i++){
+            buyOrders.add(i);
+            sellOrders.add(i);
+        }
+
+        System.out.println(buyOrders.toString());
+        System.out.println(sellOrders.toString());
     }
 
 
 }
 
 class Solution{
-    public int solution(int[] A) {
-        int len = A.length;
-        if(len == 1) return A[0] == 1 ? 2 : 1;
-        Arrays.sort(A);
-
-        for(int i = 0; i < len - 1; i++){
-            if(i == 0 && A[i] > 1) return 1;
-            if(A[i] <= 0 && A[i+1] > 1) return 1;
-            if(A[i] <= 0) continue;
-
-            if(A[i+1] - A[i] <= 1) continue;
-            else return A[i] + 1;
-        }
-
-        return A[len - 1] <= 0 ? 1 : A[len - 1] + 1;
-        // Implement your solution here
+    public int ahh(int[] A) {
+        return 0;
     }
-
 
 }
 
