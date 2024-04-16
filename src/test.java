@@ -10,6 +10,8 @@ public class test {
         re.add(3);
         re.add(4);
 
+
+
         re.stream().filter(a -> a%2 == 0).forEach(System.out::println);
 
         PriorityQueue<Integer> buyOrders = new PriorityQueue<Integer>((a, b) -> b - a);
@@ -21,6 +23,18 @@ public class test {
 
         System.out.println(buyOrders.toString());
         System.out.println(sellOrders.toString());
+
+        List<Intervals> res = new ArrayList<>();
+        res.add(new Intervals(3, 4));
+        res.add(new Intervals(2, 6));
+        res.add(new Intervals(1, 5));
+        res.add(new Intervals(1, 2));
+
+
+
+        res.sort((a, b) -> a.start - b.start);
+
+        res.stream().forEach(a -> System.out.println(a.start + "  " + a.end));
     }
 
 
@@ -31,6 +45,16 @@ class Solution{
         return 0;
     }
 
+}
+
+class Intervals {
+    public int start;
+    public int end;
+
+    public Intervals(int start, int end){
+        this.start = start;
+        this.end = end;
+    }
 }
 
 
