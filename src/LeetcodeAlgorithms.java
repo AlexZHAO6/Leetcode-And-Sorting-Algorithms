@@ -5,6 +5,12 @@ public class LeetcodeAlgorithms {
     public static void main(String[] args){
         leetcode testclass = new leetcode();
         testclass.calculate_2024("3+5 / 2");
+
+        SolutionForKnigt solutionForKnigt = new SolutionForKnigt();
+
+        System.out.println(solutionForKnigt.tourOfKnight(4, 4, 0,0));
+        System.out.println(solutionForKnigt.tourOfKnight(3, 3, 0,0));
+        System.out.println(solutionForKnigt.tourOfKnight(5, 5, 0,0));
     }
 }
 
@@ -5625,7 +5631,7 @@ class leetcode{
 
 
 
-//  new -- 2024
+//  new -- 2024 -------------- FlexPort -------------------------- FlexPort -------------------------- FlexPort ------------
     public int numDecodings_2024(String s) {
         int n = s.length();
         int[] dp = new int[n + 1];
@@ -6007,6 +6013,63 @@ class leetcode{
     }
 
 
+    public int lengthOfLIS_2024(int[] nums) {
+        int[] dp = new int[nums.length];
+        Arrays.fill(dp, 1);
+
+        int res = -1;
+        for(int i = 0; i < nums.length; i++){
+            for(int j = 0; j < i; j++){
+                if(nums[i] > nums[j]){
+                    dp[i] = Math.max(dp[i], dp[j] + 1);
+                }
+            }
+
+            res = Math.max(res, dp[i]);
+        }
+
+        return res;
+    }
+
+    public int maxSubArray_2024(int[] nums) {
+        int len = nums.length;
+        if(len == 0) return 0;
+        int[] dp = new int[len];
+
+        dp[0] = nums[0];
+        int res = dp[0];
+        for(int i = 1; i < len; i++){
+            dp[i] = Math.max(nums[i], dp[i-1] + nums[i]);
+            res = Math.max(res, dp[i]);
+        }
+
+        return res;
+    }
+
+
+    public int longestCommonSubsequence(String text1, String text2) {
+        int m = text1.length(), n = text2.length();
+        int[][] dp = new int[m + 1][n + 1];
+        // 定义：s1[0..i-1] 和 s2[0..j-1] 的 lcs 长度为 dp[i][j]
+        // 目标：s1[0..m-1] 和 s2[0..n-1] 的 lcs 长度，即 dp[m][n]
+        // base case: dp[0][..] = dp[..][0] = 0
+
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                // 现在 i 和 j 从 1 开始，所以要减一
+                if (text1.charAt(i - 1) == text2.charAt(j - 1)) {
+                    // s1[i-1] 和 s2[j-1] 必然在 lcs 中
+                    dp[i][j] = 1 + dp[i - 1][j - 1];
+                } else {
+                    // s1[i-1] 和 s2[j-1] 至少有一个不在 lcs 中
+                    dp[i][j] = Math.max(dp[i][j - 1], dp[i - 1][j]);
+                }
+            }
+        }
+
+        return dp[m][n];
+    }
+
 }
 
 class TicTacToe {
@@ -6135,6 +6198,9 @@ class MouseAndCat {
         }
         dp[mouse][cat][turns] = result;
     }
+
+
+
 }
 
 // Definition for a Node with random point.
@@ -6210,6 +6276,69 @@ class TreeNode {
 }
 
 
+class SolutionForKnigt{
+    static int[][] dirs = {{-2, -1}, {-2, 1}, {-1, 2}, {1, 2}, {2, 1}, {2, -1}, {1, -2}, {-1, -2}};
+    boolean solved = false;
+    public boolean tourOfKnight(int m, int n, int r, int c) {
+        int[][] board = new int[m][n];
 
+        for (int i = 0; i < m; i++) {
+            Arrays.fill(board[i], -1);
+        }
+
+        board[r][c] = 0;
+        int total = m * n;
+
+        backtrack(r, c, total, 1, board, m, n);
+
+        return solved;
+    }
+
+    //可以访问多次解法
+    void backtrack_multiple(int row, int col, int total, int index, int[][] board, int m, int n) {
+//        if(index == total){
+//            solved = true;
+//        }
+        solved = true;
+        for(int i = 0; i < m; i++){
+            for(int j = 0; j < n; j++){
+                if(board[i][j] == -1) solved = false;
+            }
+        }
+
+
+        for (int[] dir : dirs) {
+            int newRow = row + dir[0], newCol = col + dir[1];
+            if (newRow >= 0 && newRow < m && newCol >= 0 && newCol < n && board[newRow][newCol] == -1) {
+                board[newRow][newCol] = index;
+                backtrack_multiple(newRow, newCol, total, index, board, m, n);
+                if (!solved) {
+                    //board[newRow][newCol] = -1;
+                }
+            }
+        }
+    }
+
+
+    //访问一次解法
+    void backtrack(int row, int col, int total, int index, int[][] board, int m, int n) {
+        if(index == total){
+            solved = true;
+            return;
+        }
+
+        for (int[] dir : dirs) {
+            int newRow = row + dir[0], newCol = col + dir[1];
+            if (newRow >= 0 && newRow < m && newCol >= 0 && newCol < n && board[newRow][newCol] == -1) {
+                board[newRow][newCol] = index;
+                backtrack(newRow, newCol, total, index + 1, board, m, n);
+                if (!solved) {
+                    board[newRow][newCol] = -1;
+                }
+            }
+        }
+    }
+
+}
 
 
