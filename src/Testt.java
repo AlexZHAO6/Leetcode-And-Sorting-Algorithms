@@ -10,13 +10,6 @@ public class Testt {
     }
 }
 
-
-class Solutions{
-
-
-}
-
-
 /*
 Input:
 board =
@@ -30,13 +23,7 @@ Output: true
 
 */
 
-import java.io.*;
-import java.util.*;
-import java.text.*;
-import java.math.*;
-import java.util.regex.*;
-
-public class Solution {
+class Solution_2024 {
 
 
 
