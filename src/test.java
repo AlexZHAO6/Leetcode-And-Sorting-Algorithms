@@ -1,16 +1,37 @@
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.stream.Collectors;
 import java.util.*;
 public class test {
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws ParseException {
+
+
+        Date data = new Date(1613323132012L);
+        System.out.println(data.toString() + " " + data.getTime() + " " + System.currentTimeMillis() + " ");
+        String std = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss").format(data);
+        System.out.println(std);
+
+        long time = (new SimpleDateFormat("yyyy-mm-dd hh:mm:ss").parse("2021-18-15 01:18:52")).getTime();
+        System.out.println("TI:" + time);
         List<Integer> re = new ArrayList<>();
         re.add(1);
         re.add(2);
         re.add(3);
         re.add(4);
 
+        Map<String, List<String>> mymap = new HashMap<>();
+        mymap.put("123", new ArrayList<>());
+        for(Map.Entry<String, List<String>> current : mymap.entrySet()){
 
+        }
+
+
+        Road cc = new Road("C", -1);
+        Road bb = new Road("B",0, cc);
+        Road aa = new Road("A", 0, bb);
+
+
+        System.out.println(aa.id + " " + aa.nextRoads.light + " " + aa.nextRoads.nextRoads.light);
 
         re.stream().filter(a -> a%2 == 0).forEach(System.out::println);
 
@@ -56,6 +77,24 @@ class Intervals {
         this.end = end;
     }
 }
+
+class Road{
+    String id;
+    Road nextRoads;
+    // -1: no light 0:green 1:red
+    int light;
+
+    public Road(String id,  int light){
+        this.id = id;
+        this.light = light;
+    }
+    public Road(String id, int light, Road nextRoads){
+        this.id = id;
+        this.light = light;
+        this.nextRoads = nextRoads;
+    }
+}
+
 
 
 
