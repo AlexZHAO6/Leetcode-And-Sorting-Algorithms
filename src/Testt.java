@@ -49,6 +49,10 @@ class Solution_2024 {
 
         System.out.println(findWord(board, word));
 
+        int[] test = getFrequency("sgsg#");
+
+        Arrays.stream(test).forEach(a -> System.out.println(a));
+
     }
 
     public static boolean findWord(char[][] board, char[] word){
@@ -88,5 +92,35 @@ class Solution_2024 {
 
         return dfs(goRight[0], goRight[1], board, visited, word, index + 1) || dfs(goLeft[0], goLeft[1], board, visited, word, index + 1)
                 || dfs(goDown[0], goDown[1],  board, visited, word, index + 1) || dfs(goUp[0], goUp[1],  board, visited, word, index + 1);
+    }
+
+
+    public static int[] getFrequency(String s){
+        int len = s.length();
+        int start = 0, end = 2;
+        Map<String, Integer> res = new HashMap<>();
+        while(start < len ){
+            if(end < len && s.charAt(end) == '#'){
+                String tmp = s.charAt(start) + "" + s.charAt(start + 1);
+                res.put(tmp, res.getOrDefault(tmp, 0) + 1);
+                start = end + 1;
+                end = start + 2;
+            }
+            else {
+                String tmp = s.charAt(start) + "";
+                res.put(tmp, res.getOrDefault(tmp, 0) + 1);
+                start++;
+                end++;
+            }
+        }
+
+        int[] ff = new int[res.size()];
+        int index = 0;
+        for(Map.Entry<String, Integer> tmp : res.entrySet()){
+            ff[index] = tmp.getValue();
+            index++;
+        }
+
+        return ff;
     }
 }
