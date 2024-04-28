@@ -6070,6 +6070,75 @@ class leetcode{
         return dp[m][n];
     }
 
+    public int threeSumClosest_2024(int[] nums, int target) {
+        Arrays.sort(nums);
+        int n = nums.length;
+        int best = 10000000;
+
+        // 枚举 a
+        for (int i = 0; i < n; ++i) {
+            // 保证和上一次枚举的元素不相等
+            if (i > 0 && nums[i] == nums[i - 1]) {
+                continue;
+            }
+            // 使用双指针枚举 b 和 c
+            int j = i + 1, k = n - 1;
+            while (j < k) {
+                int sum = nums[i] + nums[j] + nums[k];
+                // 如果和为 target 直接返回答案
+                if (sum == target) {
+                    return target;
+                }
+                // 根据差值的绝对值来更新答案
+                if (Math.abs(sum - target) < Math.abs(best - target)) {
+                    best = sum;
+                }
+                if (sum > target) {
+                    // 如果和大于 target，移动 c 对应的指针
+                    int k0 = k - 1;
+                    // 移动到下一个不相等的元素
+                    while (j < k0 && nums[k0] == nums[k]) {
+                        --k0;
+                    }
+                    k = k0;
+                } else {
+                    // 如果和小于 target，移动 b 对应的指针
+                    int j0 = j + 1;
+                    // 移动到下一个不相等的元素
+                    while (j0 < k && nums[j0] == nums[j]) {
+                        ++j0;
+                    }
+                    j = j0;
+                }
+            }
+        }
+        return best;
+    }
+
+
+    public int findCheapestPrice(int n, int[][] flights, int src, int dst, int k) {
+        final int INF = 10000 * 101 + 1;
+        int[][] f = new int[k + 2][n];
+        for (int i = 0; i < k + 2; ++i) {
+            Arrays.fill(f[i], INF);
+        }
+        f[0][src] = 0;
+
+        for(int t = 1; t < k +2; t++){
+            for(int[] flight : flights){
+                int tmpdes = flight[1], tmpsrc = flight[0], cost = flight[2];
+                f[t][tmpdes] = Math.min(f[t][tmpdes], f[t-1][tmpsrc] + cost);
+            }
+        }
+
+        int res = INF;
+        for(int i = 0; i <= k + 1; i++){
+            res = Math.min(res, f[i][dst]);
+        }
+
+        return res == INF ? -1 : res;
+    }
+
 }
 
 class TicTacToe {
