@@ -1,12 +1,18 @@
+
+
+//import jdk.internal.net.http.common.Pair;
+
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.stream.Collectors;
 import java.util.*;
 public class test {
 
-    public static void main(String[] args) throws ParseException {
+    public static void main(String[] args) throws ParseException, ParseException {
 
 
         Date data = new Date(1613323132012L);
+
         System.out.println(data.toString() + " " + data.getTime() + " " + System.currentTimeMillis() + " ");
         String std = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss").format(data);
         System.out.println(std);
@@ -62,6 +68,8 @@ public class test {
         loads[3] = new int[]{5, 10, 6};
         int[] res_new = getMaxStorageInterval(loads);
         System.out.println(res_new[0] + "   " + res_new[1] + "   " + res_new[2]);
+
+      
     }
 
 
@@ -142,6 +150,8 @@ class Road{
         this.nextRoads = nextRoads;
     }
 }
+
+
 
 
 
