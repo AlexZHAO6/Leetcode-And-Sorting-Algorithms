@@ -4,7 +4,6 @@ public class LeetcodeAlgorithms {
 
     public static void main(String[] args){
         leetcode testclass = new leetcode();
-
         testclass.calculate_2024("3+5 / 2");
 
         SolutionForKnigt solutionForKnigt = new SolutionForKnigt();
@@ -5820,8 +5819,12 @@ class leetcode{
         if (intervals.length == 0) {
             return new int[0][2];
         }
-
-        Arrays.sort(intervals, (a,b) -> a[0] - b[0]);
+        Arrays.sort(intervals, new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                return o1[0] - o2[0];
+            }
+        });
         List<int[]> merged = new ArrayList<int[]>();
 
         for(int i = 0; i < intervals.length; i++){
@@ -6207,126 +6210,6 @@ class TicTacToe {
     }
 }
 
-class Game {
-        HashSet<Card> availableCards;
-        List<Player> players;
-
-    public Game() {
-        this.availableCards = new HashSet<>();
-        this.players = new ArrayList<>();
-    }
-
-    public void addPlayer(Player player) {
-        this.players.add(player);
-    }
-
-    public void addCard(Card card) {
-        this.availableCards.add(card);
-    }
-
-    public boolean canPurchase(Player player, Card card) {
-        HashMap<Token, Integer> costMap = card.costMap;
-        Integer yellowTokenCount = player.tokenMap.getOrDefault(Token.YELLOW, 0);
-
-        for (Map.Entry<Token, Integer> tokenCost : costMap.entrySet()) {
-            Token token = tokenCost.getKey();
-
-            Integer cost = tokenCost.getValue();
-            Integer availableTokens = player.tokenMap.getOrDefault(token, 0);
-            Integer availableCardTokens = player.cardTokenMap.getOrDefault(token, 0);
-            if (availableTokens + availableCardTokens < cost) {
-                int tokensNeeded = cost - (availableTokens + availableCardTokens);
-            if (yellowTokenCount < tokensNeeded) return false;
-                yellowTokenCount -= tokensNeeded;
-            }
-            }
-            return true;
-    }
-
-    public boolean purchase(Player player, Card card) {
-        if (!canPurchase(player, card)) return false;
-
-        HashMap<Token, Integer> tokensToSpend = new HashMap<>();
-        for (Map.Entry<Token, Integer> tokenCost : card.costMap.entrySet()) {
-             Token token = tokenCost.getKey();
-             Integer cost = tokenCost.getValue();
-
-             Integer availableTokens = player.tokenMap.getOrDefault(token, 0);
-             Integer availableCardTokens = player.cardTokenMap.getOrDefault(token, 0);
-
-             if (availableTokens + availableCardTokens < cost) {
-                 int yellowTokensNeeded = cost - (availableTokens + availableCardTokens);
-                tokensToSpend.put(Token.YELLOW, yellowTokensNeeded);
-            }
-             else {
-                int tokensNeeded = cost - availableCardTokens;
-                if (tokensNeeded > 0) {
-                    tokensToSpend.put(token, tokensNeeded);
-                }
-             }
-        }
-
-        player.useTokens(tokensToSpend);
-        player.addCard(card);
-        availableCards.remove(card);
-        return true;
-    }
-}
-class Player {
-    List<Card> cardList;
-    HashMap<Token, Integer> tokenMap;
-    HashMap<Token, Integer> cardTokenMap;
-    String name;
-
-    public Player(String name) {
-        this.name = name;
-        this.cardList = new ArrayList<>();
-        this.tokenMap = new HashMap<>();
-        this.cardTokenMap = new HashMap<>();
-    }
-
-    public void addCard(Card card) {
-        cardList.add(card);
-        cardTokenMap.put(card.value, cardTokenMap.getOrDefault(card.value, 0)+1);
-    }
-
-    public void addTokens(HashMap<Token, Integer> tokens) {
-        for (Map.Entry<Token, Integer> entry : tokens.entrySet()) {
-         tokenMap.put(entry.getKey(), tokenMap.getOrDefault(entry.getKey(),0) + entry.getValue());
-        }
-    }
-
-    public void useTokens(HashMap<Token, Integer> tokens) {
-        for (Map.Entry<Token, Integer> entry : tokens.entrySet()) {
-             Token token = entry.getKey();
-             Integer count = entry.getValue();
-             if (!tokenMap.containsKey(token) || tokenMap.get(token) < count) {
-            // Log error, fatal
-            continue;
-        }
-         tokenMap.put(token, tokenMap.get(token)-count);
-        }
-    }
-}
-class Card {
-    HashMap<Token, Integer> costMap;
-    Token value;
-
-    public Card(HashMap<Token, Integer> costMap, Token value){
-        this.costMap = costMap;
-        this.value = value;
-    }
-}
-enum Token {
-    RED,
-    BLUE,
-    GREEN,
-    BLACK,
-    WHITE,
-    YELLOW
-}
-
-
 // Definition for a Node with random point.
 class Node {
     int val;
@@ -6442,8 +6325,6 @@ class SolutionForKnigt{
             }
         }
     }
-
-
     //访问一次解法
     void backtrack(int row, int col, int total, int index, int[][] board, int m, int n) {
         if(index == total){

@@ -2,6 +2,16 @@ import java.util.*;
 
 public class LeetCode_ChapterOne_TF {
     public static void main(String[] args) {
+        String originalString = "io.ebay.rheos.kafka.security.iaf.login.RaptorioIAFLoginModule required iafConsumerId=\"urn:ebay-marketplace-consumerid:1069372b-f03a-4e97-b598-a9efa0bd5487\" appName=\"datclnsvc\";";
+        String SASL_JAAS_CONFIG = Base64.getUrlEncoder().encodeToString(originalString.getBytes());
+        System.out.println(SASL_JAAS_CONFIG);
+
+        List<Integer> re = new ArrayList<>();
+        re.add(1);
+        re.add(2);
+        re.clear();
+        System.out.println(re.size());
+        System.out.println(new String(Base64.getUrlDecoder().decode("aW8uZWJheS5yaGVvcy5rYWZrYS5zZWN1cml0eS5pYWYubG9naW4uUmFwdG9yaW9JQUZMb2dpbk1vZHVsZSByZXF1aXJlZCBpYWZDb25zdW1lcklkPSJ1cm46ZWJheS1tYXJrZXRwbGFjZS1jb25zdW1lcmlkOjEwNjkzNzJiLWYwM2EtNGU5Ny1iNTk4LWE5ZWZhMGJkNTQ4NyIgYXBwTmFtZT0iZGF0Y2xuc3ZjIjs=")));
 
     }
 }
@@ -42,6 +52,7 @@ class LinkedListAlgorithms_One{
         head.next.next = head;
         head.next = null;
 
+
         return last;
     }
 
@@ -70,7 +81,6 @@ class LinkedListAlgorithms_One{
         // 让反转之后的 head 节点和后面的节点连起来
         head.next = successor;
         return last;
-
     }
 
     public ListNode reverseKGroup(ListNode head, int k) {
@@ -163,5 +173,38 @@ class ArrayAlgorithms_One{
             }
         }
         return res;
+    }
+
+    /*
+    *
+    * ++++++++++ 前缀和 ++++++++++++ ++++++++++ 前缀和 ++++++++++++
+    * ++++++++++ 前缀和 ++++++++++++ ++++++++++ 前缀和 ++++++++++++
+    * ++++++++++ 前缀和 ++++++++++++ ++++++++++ 前缀和 ++++++++++++
+    *
+    * */
+    class NumArray {
+        private int[] preSum;
+        public NumArray(int[] nums) {
+            preSum = new int[nums.length + 1];
+            // 计算 nums 的累加和
+            for (int i = 1; i < preSum.length; i++) {
+                preSum[i] = preSum[i - 1] + nums[i - 1];
+            }
+        }
+
+        public int sumRange(int left, int right) {
+            return preSum[right + 1] - preSum[left];
+        }
+    }
+
+    class NumMatrix {
+
+        public NumMatrix(int[][] matrix) {
+
+        }
+
+        public int sumRegion(int row1, int col1, int row2, int col2) {
+            return 0;
+        }
     }
 }
