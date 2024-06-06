@@ -56,16 +56,6 @@ class LinkedListAlgorithms_One{
         return last;
     }
 
-    //反转一部分，用到了反转前n个节点！！
-    public ListNode reverseBetween(ListNode head, int m, int n) {
-        // base case
-        if (m == 1) {
-            return reverseN(head, n);
-        }
-        // 前进到反转的起点触发 base case
-        head.next = reverseBetween(head.next, m - 1, n - 1);
-        return head;
-    }
 
     // 反转以 head 为起点的 n 个节点，返回新的头结点
     ListNode reverseN(ListNode head, int n) {
@@ -82,6 +72,18 @@ class LinkedListAlgorithms_One{
         head.next = successor;
         return last;
     }
+
+    //反转一部分，用到了反转前n个节点！！
+    public ListNode reverseBetween(ListNode head, int m, int n) {
+        // base case
+        if (m == 1) {
+            return reverseN(head, n);
+        }
+        // 前进到反转的起点触发 base case
+        head.next = reverseBetween(head.next, m - 1, n - 1);
+        return head;
+    }
+
 
     public ListNode reverseKGroup(ListNode head, int k) {
         if(head == null) return head;
@@ -198,13 +200,223 @@ class ArrayAlgorithms_One{
     }
 
     class NumMatrix {
-
+        // 定义：preSum[i][j] 记录 matrix 中子矩阵 [0, 0, i-1, j-1] 的元素和
+        private int[][] preSum;
         public NumMatrix(int[][] matrix) {
-
+            int m = matrix.length, n = matrix[0].length;
+            if (m == 0 || n == 0) return;
+            // 构造前缀和矩阵
+            preSum = new int[m + 1][n + 1];
+            for (int i = 1; i <= m; i++) {
+                for (int j = 1; j <= n; j++) {
+                    // 计算每个矩阵 [0, 0, i, j] 的元素和
+                    preSum[i][j] = preSum[i-1][j] + preSum[i][j-1] + matrix[i - 1][j - 1] - preSum[i-1][j-1];
+                }
+            }
         }
 
         public int sumRegion(int row1, int col1, int row2, int col2) {
-            return 0;
+            return preSum[row2+1][col2+1] - preSum[row2+1][col1] - preSum[row1][col2+1] + preSum[row1][col1];
         }
     }
+
+    /*
+     *
+     * ++++++++++ 差分 ++++++++++++ ++++++++++ 差分 ++++++++++++
+     * ++++++++++ 差分 ++++++++++++ ++++++++++ 差分 ++++++++++++
+     * ++++++++++ 差分 ++++++++++++ ++++++++++ 差分 ++++++++++++
+     *
+     * */
+    class Difference {
+        // 差分数组
+        private int[] diff;
+
+        /* 输入一个初始数组，区间操作将在这个数组上进行 */
+        public Difference(int[] nums) {
+            diff = new int[nums.length];
+            // 根据初始数组构造差分数组
+            diff[0] = nums[0];
+            for (int i = 1; i < nums.length; i++) {
+                diff[i] = nums[i] - nums[i - 1];
+            }
+        }
+
+        /* 给闭区间 [i, j] 增加 val（可以是负数）*/
+        public void increment(int i, int j, int val) {
+            diff[i] += val;
+            if (j + 1 < diff.length) {
+                diff[j + 1] -= val;
+            }
+        }
+
+        /* 返回结果数组 */
+        public int[] result() {
+            int[] res = new int[diff.length];
+            // 根据差分数组构造结果数组
+            res[0] = diff[0];
+            for (int i = 1; i < diff.length; i++) {
+                res[i] = res[i - 1] + diff[i];
+            }
+            return res;
+        }
+    }
+
+    public int[] getModifiedArray(int length, int[][] updates) {
+        // nums 初始化为全 0
+        int[] nums = new int[length];
+        Difference df = new Difference(nums);
+
+        for(int[] up : updates){
+            int start = up[0];
+            int end = up[1];
+            int incr = up[2];
+            df.increment(start, end, incr);
+        }
+
+        return df.result();
+    }
+
+    public int[] corpFlightBookings(int[][] bookings, int n) {
+        int[] nums = new int[n];
+        Difference df = new Difference(nums);
+
+        for(int[] booking : bookings){
+            int i = booking[0];
+            int j = booking[1];
+            int incr = booking[2];
+
+            df.increment(i-1, j-1, incr);
+        }
+        return df.result();
+    }
+
+    public boolean carPooling(int[][] trips, int capacity) {
+        int[] nums = new int[1001];
+        Difference df = new Difference(nums);
+
+        for(int[] trip : trips){
+            int i = trip[1];
+            int j = trip[2] - 1; // because the passenger has already get off on trip[2]
+            int incr = trip[0];
+
+            df.increment(i, j, incr);
+        }
+
+        nums = df.result();
+        for(int a : nums){
+            if(a > capacity) return false;
+        }
+        return true;
+    }
+
+    /*
+     *
+     * ++++++++++ 二维数组的花式遍历技巧 ++++++++++++ ++++++++++ 二维数组的花式遍历技巧 ++++++++++++
+     * ++++++++++ 二维数组的花式遍历技巧 ++++++++++++ ++++++++++ 二维数组的花式遍历技巧 ++++++++++++
+     * ++++++++++ 二维数组的花式遍历技巧 ++++++++++++ ++++++++++ 二维数组的花式遍历技巧 ++++++++++++
+     *
+     * */
+
+    public void rotate(int[][] matrix) {
+        int n = matrix.length;
+        // 先沿对角线镜像对称二维矩阵
+        for (int i = 0; i < n; i++) {
+            for (int j = i; j < n; j++) {
+                // swap(matrix[i][j], matrix[j][i]);
+                int temp = matrix[i][j];
+                matrix[i][j] = matrix[j][i];
+                matrix[j][i] = temp;
+            }
+        }
+        // 然后反转二维矩阵的每一行
+        for (int[] row : matrix) {
+            reverse(row);
+        }
+    }
+    void reverse(int[] arr) {
+        int i = 0, j = arr.length - 1;
+        while (j > i) {
+            // swap(arr[i], arr[j]);
+            int temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+            i++;
+            j--;
+        }
+    }
+
+    public List<Integer> spiralOrder(int[][] matrix) {
+        int m = matrix.length, n = matrix[0].length;
+        int upper_bound = 0, lower_bound = m - 1;
+        int left_bound = 0, right_bound = n - 1;
+        List<Integer> res = new LinkedList<>();
+        // res.size() == m * n 则遍历完整个数组
+        while (res.size() < m * n) {
+            if (upper_bound <= lower_bound) {
+                // 在顶部从左向右遍历
+                for (int j = left_bound; j <= right_bound; j++) {
+                    res.add(matrix[upper_bound][j]);
+                }
+                // 上边界下移
+                upper_bound++;
+            }
+
+            if (left_bound <= right_bound) {
+                // 在右侧从上向下遍历
+                for (int i = upper_bound; i <= lower_bound; i++) {
+                    res.add(matrix[i][right_bound]);
+                }
+                // 右边界左移
+                right_bound--;
+            }
+
+            if (upper_bound <= lower_bound) {
+                // 在底部从右向左遍历
+                for (int j = right_bound; j >= left_bound; j--) {
+                    res.add(matrix[lower_bound][j]);
+                }
+                // 下边界上移
+                lower_bound--;
+            }
+
+            if (left_bound <= right_bound) {
+                // 在左侧从下向上遍历
+                for (int i = lower_bound; i >= upper_bound; i--) {
+                    res.add(matrix[i][left_bound]);
+                }
+                // 左边界右移
+                left_bound++;
+            }
+        }
+        return res;
+    }
+
+
+
+    public ListNode rotateRight(ListNode head, int k) {
+        //具体代码中，我们首先计算出链表的长度 nnn，并找到该链表的末尾节点，将其与头节点相连。
+        // 这样就得到了闭合为环的链表。
+        // 然后我们找到新链表的最后一个节点（即原链表的第 (n−1)−(k mod n) 个节点），将当前闭合为环的链表断开，即可得到我们所需要的结果。
+        if (k == 0 || head == null || head.next == null) {
+            return head;
+        }
+        int n = 1;
+        ListNode iter = head;
+        while (iter.next != null) {
+            iter = iter.next;
+            n++;
+        }
+        int add = n - k % n;
+        if (add == n) {
+            return head;
+        }
+        iter.next = head;
+        while (add-- > 0) {
+            iter = iter.next;
+        }
+        ListNode ret = iter.next;
+        iter.next = null;
+        return ret;
+    }
 }
+
