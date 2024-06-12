@@ -418,5 +418,103 @@ class ArrayAlgorithms_One{
         iter.next = null;
         return ret;
     }
+
+    public String removeDuplicateLetters(String s) {
+        Stack<Character> stk = new Stack<>();
+
+        // 维护一个计数器记录字符串中字符的数量
+        // 因为输入为 ASCII 字符，大小 256 够用了
+        int[] count = new int[256];
+        for (int i = 0; i < s.length(); i++) {
+            count[s.charAt(i)]++;
+        }
+
+        boolean[] inStack = new boolean[256];
+        for (char c : s.toCharArray()) {
+            // 每遍历过一个字符，都将对应的计数减一
+            count[c]--;
+
+            if (inStack[c]) continue;
+
+            while (!stk.isEmpty() && stk.peek() > c) {
+                // 若之后不存在栈顶元素了，则停止 pop
+                if (count[stk.peek()] == 0) {
+                    break;
+                }
+                // 若之后还有，则可以 pop
+                inStack[stk.pop()] = false;
+            }
+            stk.push(c);
+            inStack[c] = true;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        while (!stk.empty()) {
+            sb.append(stk.pop());
+        }
+        return sb.reverse().toString();
+    }
+}
+
+class BinaryTree_ChapterOne{
+    public int maxDepth(TreeNode root) {
+        if(root == null) return 0;
+
+        int left = maxDepth(root.left);
+        int right = maxDepth(root.right);
+
+        return Math.max(left, right) + 1;
+    }
+
+    class DiameterOfBinaryTree {
+        int longestPath = 0;
+        public int diameterOfBinaryTree(TreeNode root) {
+            diameterOfBinaryTree_traverse(root);
+
+            return longestPath;
+        }
+        int diameterOfBinaryTree_traverse(TreeNode root){
+            if(root == null) return 0;
+
+            int left = diameterOfBinaryTree_traverse(root.left);
+            int right = diameterOfBinaryTree_traverse(root.right);
+
+            int currtMax = left + right;
+            longestPath = Math.max(currtMax, longestPath);
+
+            return 1 + Math.max(left, right);
+        }
+    }
+
+    class BinaryTree_level_order_Traverse {
+        //using recursion to solve!!!!
+        List<List<Integer>> res = new ArrayList<>();
+
+        List<List<Integer>> levelTraverse(TreeNode root) {
+            if (root == null) {
+                return res;
+            }
+            // root 视为第 0 层
+            traverse(root, 0);
+            return res;
+        }
+
+        void traverse(TreeNode root, int depth) {
+            if (root == null) {
+                return;
+            }
+            // 前序位置，看看是否已经存储 depth 层的节点了
+            if (res.size() <= depth) {
+                // 第一次进入 depth 层
+                res.add(new LinkedList<>());
+            }
+            // 前序位置，在 depth 层添加 root 节点的值
+            res.get(depth).add(root.val);
+            traverse(root.left, depth + 1);
+            traverse(root.right, depth + 1);
+        }
+    }
+
+
 }
 

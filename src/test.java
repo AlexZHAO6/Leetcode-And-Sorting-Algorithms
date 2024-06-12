@@ -69,6 +69,7 @@ public class test {
         int[] res_new = getMaxStorageInterval(loads);
         System.out.println(res_new[0] + "   " + res_new[1] + "   " + res_new[2]);
 
+        System.out.println(TestEnum.valueOf("BUYER_BEST_OFFER"));
       
     }
 
