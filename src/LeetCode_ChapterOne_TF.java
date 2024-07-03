@@ -457,6 +457,10 @@ class ArrayAlgorithms_One{
 }
 
 class BinaryTree_ChapterOne{
+    // 记录所有子树以及出现的次数
+    HashMap<String, Integer> subTrees = new HashMap<>();
+    // 记录重复的子树根节点
+    LinkedList<TreeNode> res = new LinkedList<>();
     public int maxDepth(TreeNode root) {
         if(root == null) return 0;
 
@@ -527,14 +531,14 @@ class BinaryTree_ChapterOne{
         return root;
     }
 
-    public Node connect(Node root) {
+    public Node_TF connect(Node_TF root) {
         if (root == null) return null;
         // 遍历「三叉树」，连接相邻节点
         traverse(root.left, root.right);
         return root;
     }
     // 三叉树遍历框架
-    void traverse(Node node1, Node node2) {
+    void traverse(Node_TF node1, Node_TF node2) {
         if (node1 == null || node2 == null) {
             return;
         }
@@ -571,22 +575,158 @@ class BinaryTree_ChapterOne{
         p.right = right;
     }
 
+    public TreeNode constructMaximumBinaryTree(int[] nums) {
+        return build(nums, 0, nums.length - 1);
+    }
+    // 定义：将 nums[lo..hi] 构造成符合条件的树，返回根节点
+    TreeNode build(int[] nums, int lo, int hi) {
+        // base case
+        if (lo > hi) {
+            return null;
+        }
+
+        // 找到数组中的最大值和对应的索引
+        int index = -1, maxVal = Integer.MIN_VALUE;
+        for (int i = lo; i <= hi; i++) {
+            if (maxVal < nums[i]) {
+                index = i;
+                maxVal = nums[i];
+            }
+        }
+
+        // 先构造出根节点
+        TreeNode root = new TreeNode(maxVal);
+        // 递归调用构造左右子树
+        root.left = build(nums, lo, index - 1);
+        root.right = build(nums, index + 1, hi);
+
+        return root;
+    }
+
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        return buildTree_help(preorder, 0, preorder.length - 1, inorder, 0, inorder.length - 1);
+    }
+    TreeNode buildTree_help(int[] preorder, int preStart, int preEnd, int[] inorder, int inStart, int inEnd){
+        if(preStart > preEnd || inStart > inEnd) return null;
+
+        int rootVal = preorder[preStart];
+        // rootVal 在中序遍历数组中的索引
+        int index = -1;
+        for(int i = inStart; i <= inEnd; i++){
+            if(inorder[i] == rootVal){
+                index = i;
+                break;
+            }
+        }
+
+        int leftSize = index - inStart;
+        TreeNode root = new TreeNode(rootVal);
+        root.left = buildTree_help(preorder, preStart+1,preStart + leftSize,inorder, inStart, index - 1);
+        root.right = buildTree_help(preorder,preStart + leftSize + 1,preEnd, inorder, index+1, inEnd);
+
+        return root;
+    }
+
+    public TreeNode buildTree_2(int[] inorder, int[] postorder) {
+        return buildTree_2_help(inorder, 0, inorder.length - 1, postorder, 0, postorder.length - 1);
+    }
+    TreeNode buildTree_2_help(int[] inorder, int inStart, int inEnd, int[] postorder, int postStart, int postEnd){
+        if (inStart > inEnd) {
+            return null;
+        }
+
+        int rootVal = postorder[postEnd];
+        // rootVal 在中序遍历数组中的索引
+        int index = -1;
+        for(int i = inStart; i <= inEnd; i++){
+            if(inorder[i] == rootVal){
+                index = i;
+                break;
+            }
+        }
+        int leftSize = index - inStart;
+        TreeNode root = new TreeNode(rootVal);
+        root.left = buildTree_2_help(inorder, inStart,index - 1, postorder, postStart, postStart + leftSize - 1);
+        root.right = buildTree_2_help(inorder,index + 1, inEnd, postorder, postStart + leftSize, postEnd - 1);
+
+        return root;
+    }
+
+    public TreeNode constructFromPrePost(int[] preorder, int[] postorder) {
+        return constructFromPrePost_help(preorder,0, preorder.length - 1, postorder, 0, postorder.length - 1);
+    }
+    TreeNode constructFromPrePost_help(int[] preorder, int preStart, int preEnd, int[] postorder, int postStart, int postEnd){
+        //1、首先把前序遍历结果的第一个元素或者后序遍历结果的最后一个元素确定为根节点的值。
+        //
+        //2、然后把前序遍历结果的第二个元素作为左子树的根节点的值。
+        //
+        //3、在后序遍历结果中寻找左子树根节点的值，从而确定了左子树的索引边界，进而确定右子树的索引边界，递归构造左右子树即可。
+        if (preStart > preEnd) {
+            return null;
+        }
+        if (preStart == preEnd) {
+            return new TreeNode(preorder[preStart]);
+        }
+
+        int rootVal = preorder[preStart];
+        int leftRoot = preorder[preStart + 1];
+        int index = -1;
+        for(int i = postStart; i <= postEnd; i++){
+            if(leftRoot == postorder[i]){
+                index = i;
+                break;
+            }
+        }
+        int leftSize = index - postStart + 1;
+
+        TreeNode root = new TreeNode(rootVal);
+        root.left = constructFromPrePost_help(preorder, preStart + 1, preStart + leftSize, postorder, postStart, index);
+        root.right = constructFromPrePost_help(preorder, preStart + leftSize + 1, preEnd, postorder, index + 1, postEnd);
+
+        return root;
+    }
+
+    public List<TreeNode> findDuplicateSubtrees(TreeNode root) {
+        serialize(root);
+        return res;
+    }
+    String serialize(TreeNode root) {
+        if (root == null) {
+            return "#";
+        }
+
+        // 先算左右子树的序列化结果
+        String left = serialize(root.left);
+        String right = serialize(root.right);
+
+        String myself = left + "," + right+ "," + root.val;
+
+        int freq = subTrees.getOrDefault(myself, 0);
+        // 多次重复也只会被加入结果集一次
+        if (freq == 1) {
+            res.add(root);
+        }
+        // 给子树对应的出现次数加一
+        subTrees.put(myself, freq + 1);
+        return myself;
+    }
+
 
 }
 // Definition for a Node.
-class Node {
+class Node_TF {
     public int val;
-    public Node left;
-    public Node right;
-    public Node next;
+    public Node_TF left;
+    public Node_TF right;
+    public Node_TF next;
 
-    public Node() {}
+    public Node_TF() {}
 
-    public Node(int _val) {
+    public Node_TF(int _val) {
         val = _val;
     }
 
-    public Node(int _val, Node _left, Node _right, Node _next) {
+    public Node_TF(int _val, Node_TF _left, Node_TF _right, Node_TF _next) {
         val = _val;
         left = _left;
         right = _right;
