@@ -461,6 +461,11 @@ class BinaryTree_ChapterOne{
     HashMap<String, Integer> subTrees = new HashMap<>();
     // 记录重复的子树根节点
     LinkedList<TreeNode> res = new LinkedList<>();
+
+    int rank;
+    int res_kth;
+
+    int sum_converBST;
     public int maxDepth(TreeNode root) {
         if(root == null) return 0;
 
@@ -709,6 +714,45 @@ class BinaryTree_ChapterOne{
         // 给子树对应的出现次数加一
         subTrees.put(myself, freq + 1);
         return myself;
+    }
+
+    public int kthSmallest(TreeNode root, int k) {
+        traverse_kth(root, k);
+        return res_kth;
+    }
+    void traverse_kth(TreeNode root, int k){
+        if (root == null) {
+            return;
+        }
+        traverse_kth(root.left, k);
+        /* 中序遍历代码位置 */
+        rank++;
+        if (k == rank) {
+            // 找到第 k 小的元素
+            res_kth = root.val;
+            return;
+        }
+        /*****************/
+        traverse_kth(root.right, k);
+    }
+
+
+    //核心还是 BST 的中序遍历特性，只不过我们修改了递归顺序，降序遍历 BST 的元素值，从而契合题目累加树的要求
+
+    public TreeNode convertBST(TreeNode root) {
+        convertBST_help(root);
+        return root;
+    }
+    void convertBST_help(TreeNode root){
+        //traverse right and then root and then left;
+        //this can sort the val by desc order
+        if(root == null) return;
+        convertBST_help(root.right);
+
+        sum_converBST += root.val;
+        root.val = sum_converBST;
+
+        convertBST_help(root.left);
     }
 
 
