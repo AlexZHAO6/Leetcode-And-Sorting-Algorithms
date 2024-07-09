@@ -466,6 +466,9 @@ class BinaryTree_ChapterOne{
     int res_kth;
 
     int sum_converBST;
+
+    // 备忘录
+    int[][] memo;
     public int maxDepth(TreeNode root) {
         if(root == null) return 0;
 
@@ -753,6 +756,95 @@ class BinaryTree_ChapterOne{
         root.val = sum_converBST;
 
         convertBST_help(root.left);
+    }
+
+    public boolean isValidBST(TreeNode root) {
+        return isValidBST(root, Long.MIN_VALUE, Long.MAX_VALUE);
+    }
+    public boolean isValidBST(TreeNode node, long lower, long upper) {
+        if (node == null) {
+            return true;
+        }
+        if (node.val <= lower || node.val >= upper) {
+            return false;
+        }
+        return isValidBST(node.left, lower, node.val) && isValidBST(node.right, node.val, upper);
+    }
+
+    public TreeNode searchBST(TreeNode root, int val) {
+        if (root == null) {
+            return null;
+        }
+        // 去左子树搜索
+        if (root.val > val) {
+            return searchBST(root.left, val);
+        }
+        // 去右子树搜索
+        if (root.val < val) {
+            return searchBST(root.right, val);
+        }
+        return root;
+    }
+
+    public int numTrees(int n) {
+        memo = new int[n + 1][n + 1];
+        return count(1, n);
+    }
+    int count(int left, int right){
+        if(left > right) return 1;
+
+        // 查备忘录
+        if (memo[left][right] != 0) {
+            return memo[left][right];
+        }
+
+        int res = 0;
+        for (int mid = left; mid <= right; mid++) {
+            int l = count(left, mid - 1);
+            int r = count(mid + 1, right);
+            res += l * r;
+        }
+        // 将结果存入备忘录
+        memo[left][right] = res;
+
+        return res;
+     }
+
+    public List<TreeNode> generateTrees(int n) {
+        if (n == 0) return new LinkedList<>();
+        // 构造闭区间 [1, n] 组成的 BST
+        return build(1, n);
+    }
+    List<TreeNode> build(int lo, int hi){
+        List<TreeNode> res = new ArrayList<>();
+        if(lo > hi){
+            // 这里需要装一个 null 元素，这样才能让下面的两个内层 for 循环都能进入，正确地创建出叶子节点
+            // 举例来说吧，什么时候会进到这个 if 语句？当你创建叶子节点的时候，对吧。
+            // 那么如果你这里不加 null，直接返回空列表，那么下面的内层两个 for 循环都无法进入
+            // 你的那个叶子节点就没有创建出来，看到了吗？所以这里要加一个 null，确保下面能把叶子节点做出来
+            res.add(null);
+            return res;
+        }
+
+        // 1、穷举 root 节点的所有可能。
+        for(int i = lo; i <= hi; i++){
+            // 2、递归构造出左右子树的所有有效 BST。
+            List<TreeNode> left = build(lo, i - 1);
+            List<TreeNode> right = build(i + 1, hi);
+
+            // 3、给 root 节点穷举所有左右子树的组合。
+            for(TreeNode l : left){
+                for(TreeNode r : right){
+                    TreeNode root = new TreeNode(i);
+                    root.left = l;
+                    root.right = r;
+
+                    res.add(root);
+                }
+            }
+        }
+
+        return res;
     }
 
 
