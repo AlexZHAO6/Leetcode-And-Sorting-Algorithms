@@ -847,6 +847,31 @@ class BinaryTree_ChapterOne{
         return res;
     }
 
+    // O(logN*logN)
+    //reason:
+    //关键点在于，countNodes(root.left), countNodes(root.right) 这两个递归只有一个会真的递归下去，另一个一定会触发 hl == hr 而立即返回，不会递归下去。
+    //为什么呢？原因如下：
+    //一棵完全二叉树的两棵子树，至少有一棵是满二叉树：
+    public int countNodes(TreeNode root) {
+        TreeNode l = root, r = root;
+        // 沿最左侧和最右侧分别计算高度
+        int hl = 0, hr = 0;
+        while (l != null) {
+            l = l.left;
+            hl++;
+        }
+        while (r != null) {
+            r = r.right;
+            hr++;
+        }
+        // 如果左右侧计算的高度相同，则是一棵满二叉树
+        if (hl == hr) {
+            return (int)Math.pow(2, hl) - 1;
+        }
+        // 如果左右侧的高度不同，则按照普通二叉树的逻辑计算
+        return 1 + countNodes(root.left) + countNodes(root.right);
+    }
+
 
 }
 // Definition for a Node.
@@ -869,4 +894,173 @@ class Node_TF {
         next = _next;
     }
 };
+
+class MyQueue {
+    Deque<Integer> inStack;
+    Deque<Integer> outStack;
+
+    public MyQueue() {
+        inStack = new ArrayDeque<Integer>();
+        outStack = new ArrayDeque<Integer>();
+    }
+
+    public void push(int x) {
+        inStack.push(x);
+    }
+
+    public int pop() {
+        if (outStack.isEmpty()) {
+            in2out();
+        }
+        return outStack.pop();
+    }
+
+    public int peek() {
+        if (outStack.isEmpty()) {
+            in2out();
+        }
+        return outStack.peek();
+    }
+
+    public boolean empty() {
+        return inStack.isEmpty() && outStack.isEmpty();
+    }
+
+    private void in2out() {
+        while (!inStack.isEmpty()) {
+            outStack.push(inStack.pop());
+        }
+    }
+}
+
+class MyStack {
+    Queue<Integer> q = new LinkedList<>();
+    int top_elem = 0;
+
+    /**
+     * 添加元素到栈顶
+     */
+    public void push(int x) {
+        // x 是队列的队尾，是栈的栈顶
+        q.offer(x);
+        top_elem = x;
+    }
+
+    /**
+     * 返回栈顶元素
+     */
+    public int top() {
+        return top_elem;
+    }
+
+    /** 删除栈顶的元素并返回 */
+    public int pop() {
+        int size = q.size();
+        // 留下队尾 2 个元素
+        while (size > 2) {
+            q.offer(q.poll());
+            size--;
+        }
+        // 记录新的队尾元素
+        top_elem = q.peek();
+        q.offer(q.poll());
+        // 删除之前的队尾元素
+        return q.poll();
+    }
+
+    /** 判断栈是否为空 */
+    public boolean empty() {
+        return q.isEmpty();
+    }
+}
+
+//想要用数组模拟二叉树，前提是这个二叉树必须是完全二叉树。
+class SimpleMinPQ {
+    private final int[] heap;
+    private int size;
+
+    public SimpleMinPQ(int capacity) {
+        // 索引 0 空着不用，所以多分配一个空间
+        heap = new int[capacity + 1];
+        size = 0;
+    }
+
+    public int size() {
+        return size;
+    }
+
+    // 父节点的索引
+    int parent(int node) {
+        return node / 2;
+    }
+
+    // 左子节点的索引
+    int left(int node) {
+        return node * 2;
+    }
+
+    // 右子节点的索引
+    int right(int node) {
+        return node * 2 + 1;
+    }
+
+    // 交换数组的两个元素
+    private void swap(int i, int j) {
+        int temp = heap[i];
+        heap[i] = heap[j];
+        heap[j] = temp;
+    }
+
+    // 查，返回堆顶元素，时间复杂度 O(1)
+    public int peek() {
+        // 索引 0 空着不用，所以堆顶元素是索引 1
+        return heap[1];
+    }
+
+
+    // 增，向堆中插入一个元素，时间复杂度 O(logN)
+    public void push(int x) {
+        // 把新元素放到最后
+        heap[++size] = x;
+        // 然后上浮到正确位置
+        swim(size);
+    }
+
+    // 删，删除堆顶元素，时间复杂度 O(logN)
+    public int pop() {
+        int res = heap[1];
+        // 把堆底元素放到堆顶
+        heap[1] = heap[size--];
+        // 然后下沉到正确位置
+        sink(1);
+        return res;
+    }
+
+    // 上浮操作，时间复杂度是树高 O(logN)
+    private void swim(int x) {
+        while (x > 1 && heap[parent(x)] > heap[x]) {
+            swap(parent(x), x);
+            x = parent(x);
+        }
+    }
+
+    // 下沉操作，时间复杂度是树高 O(logN)
+    private void sink(int x) {
+        while (left(x) <= size || right(x) <= size) {
+            int min = x;
+            if (left(x) <= size && heap[left(x)] < heap[min]) {
+                min = left(x);
+            }
+            if (right(x) <= size && heap[right(x)] < heap[min]) {
+                min = right(x);
+            }
+            if (min == x) {
+                break;
+            }
+
+            swap(x, min);
+            x = min;
+        }
+    }
+}
 

@@ -61,6 +61,9 @@ class SortAlgorithms_real{
         }
     }
 
+    //快速排序理想情况的时间复杂度是 O(NlogN)，空间复杂度 O(logN)，极端情况下的最坏时间复杂度是 O(N^2)，空间复杂度是 O(N)
+    //如果每次 partition 切分的结果都极不均匀 导致树的高度从logN变成了N 也就退化成了选择排序！
+    //还有一点需要注意的是，快速排序是「不稳定排序」，与之相对的，前文讲的 归并排序 是「稳定排序」。
     public void quickSortHelp(int[] arrs){
         quickSort(arrs,0,arrs.length-1);
     }
@@ -100,53 +103,12 @@ class SortAlgorithms_real{
 
 
 
+
+
     public void mergeSort(int[] arr) {
-        if (arr.length == 0) return;
-        int[] result = new int[arr.length];
-        mergeSort(arr, 0, arr.length - 1, result);
+        //refer to Class merge
     }
 
-    // 对 arr 的 [start, end] 区间归并排序
-    private void mergeSort(int[] arr, int start, int end, int[] result) {
-        // 只剩下一个数字，停止拆分
-        if (start == end) return;
-        int middle = (start + end) / 2;
-        // 拆分左边区域，并将归并排序的结果保存到 result 的 [start, middle] 区间
-        mergeSort(arr, start, middle, result);
-        // 拆分右边区域，并将归并排序的结果保存到 result 的 [middle + 1, end] 区间
-        mergeSort(arr, middle + 1, end, result);
-        // 合并左右区域到 result 的 [start, end] 区间
-        merge(arr, start, end, result);
-    }
-
-    // 将 result 的 [start, middle] 和 [middle + 1, end] 区间合并
-    private void merge(int[] arr, int start, int end, int[] result) {
-        int end1 = (start + end) / 2;
-        int start2 = end1 + 1;
-        // 用来遍历数组的指针
-        int index1 = start;
-        int index2 = start2;
-        while (index1 <= end1 && index2 <= end) {
-            if (arr[index1] <= arr[index2]) {
-                //resultIndex = start + (index1 - start1) + (index2 - start2) , start1 = start;
-                result[index1 + index2 - start2] = arr[index1++];
-            } else {
-                //resultIndex = start + (index1 - start1) + (index2 - start2)
-                result[index1 + index2 - start2] = arr[index2++];
-            }
-        }
-        // 将剩余数字补到结果数组之后
-        while (index1 <= end1) {
-            result[index1 + index2 - start2] = arr[index1++];
-        }
-        while (index2 <= end) {
-            result[index1 + index2 - start2] = arr[index2++];
-        }
-        // 将 result 操作区间的数字拷贝到 arr 数组中，以便下次比较
-        while (start <= end) {
-            arr[start] = result[start++];
-        }
-    }
 
 
     //计数排序
@@ -182,4 +144,60 @@ class SortAlgorithms_real{
     }
 
 
+}
+
+//merge sort!!
+//O(NlogN)
+class Merge {
+
+    // 用于辅助合并有序数组
+    private static int[] temp;
+
+    public static void sort(int[] nums) {
+        // 先给辅助数组开辟内存空间
+        temp = new int[nums.length];
+        // 排序整个数组（原地修改）
+        sort(nums, 0, nums.length - 1);
+    }
+
+    // 定义：将子数组 nums[lo..hi] 进行排序
+    private static void sort(int[] nums, int lo, int hi) {
+        if (lo == hi) {
+            // 单个元素不用排序
+            return;
+        }
+        // 这样写是为了防止溢出，效果等同于 (hi + lo) / 2
+        int mid = lo + (hi - lo) / 2;
+        // 先对左半部分数组 nums[lo..mid] 排序
+        sort(nums, lo, mid);
+        // 再对右半部分数组 nums[mid+1..hi] 排序
+        sort(nums, mid + 1, hi);
+        // 将两部分有序数组合并成一个有序数组
+        merge(nums, lo, mid, hi);
+    }
+
+    // 将 nums[lo..mid] 和 nums[mid+1..hi] 这两个有序数组合并成一个有序数组
+    private static void merge(int[] nums, int lo, int mid, int hi) {
+        // 先把 nums[lo..hi] 复制到辅助数组中
+        // 以便合并后的结果能够直接存入 nums
+        for (int i = lo; i <= hi; i++) {
+            temp[i] = nums[i];
+        }
+
+        // 数组双指针技巧，合并两个有序数组
+        int i = lo, j = mid + 1;
+        for (int p = lo; p <= hi; p++) {
+            if (i == mid + 1) {
+                // 左半边数组已全部被合并
+                nums[p] = temp[j++];
+            } else if (j == hi + 1) {
+                // 右半边数组已全部被合并
+                nums[p] = temp[i++];
+            } else if (temp[i] > temp[j]) {
+                nums[p] = temp[j++];
+            } else {
+                nums[p] = temp[i++];
+            }
+        }
+    }
 }
