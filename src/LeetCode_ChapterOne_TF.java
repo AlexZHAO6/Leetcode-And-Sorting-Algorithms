@@ -1073,6 +1073,14 @@ class GraphAlgorithms_ChapterOne{
     boolean[] visited;
     // 记录图中是否有环
     boolean hasCycle = false;
+
+    //记录图着色信息
+    boolean[] color;
+
+    boolean isParti = true;
+
+    // 记录后序遍历结果
+    List<Integer> postorder = new ArrayList<>();
     public List<List<Integer>> allPathsSourceTarget(int[][] graph) {
         // 维护递归过程中经过的路径
         LinkedList<Integer> path = new LinkedList<>();
@@ -1148,5 +1156,94 @@ class GraphAlgorithms_ChapterOne{
         // 后序代码位置
         onPath[s] = false;
     }
+
+    //「拓扑排序的结果就是反转之后的后序遍历结果」
+    //可以认为二叉树是有向图 后续遍历反转后正好是拓扑排序的结果！
+    public int[] findOrder(int numCourses, int[][] prerequisites) {
+        List<Integer>[] graph = buildGraph(numCourses, prerequisites);
+        visited = new boolean[numCourses];
+        onPath = new boolean[numCourses];
+        // 遍历图
+        for (int i = 0; i < numCourses; i++) {
+            traverse_2(graph, i);
+        }
+        // 有环图无法进行拓扑排序
+        if (hasCycle) {
+            return new int[]{};
+        }
+        // 逆后序遍历结果即为拓扑排序结果
+        Collections.reverse(postorder);
+        int[] res = new int[numCourses];
+        for (int i = 0; i < numCourses; i++) {
+            res[i] = postorder.get(i);
+        }
+        return res;
+    }
+    void traverse_2(List<Integer>[] graph, int s) {
+        if (onPath[s]) {
+            // 出现环
+            hasCycle = true;
+
+        }
+
+        if (visited[s] || hasCycle) {
+            // 如果已经找到了环，也不用再遍历了
+            return;
+        }
+        // 前序代码位置
+        visited[s] = true;
+        onPath[s] = true;
+        for (int t : graph[s]) {
+            traverse_2(graph, t);
+        }
+        // 后序代码位置
+        postorder.add(s);
+        onPath[s] = false;
+    }
+
+    /****
+     * 判定二分图的算法很简单，就是用代码解决「双色问题」。
+     *
+     * 说白了就是遍历一遍图，一边遍历一边染色，看看能不能用两种颜色给所有节点染色，且相邻节点的颜色都不相同。
+     */
+    public boolean isBipartite(int[][] graph) {
+        int n = graph.length;
+        color = new boolean[n];
+        visited = new boolean[n];
+        // 因为图不一定是联通的，可能存在多个子图
+        // 所以要把每个节点都作为起点进行一次遍历
+        // 如果发现任何一个子图不是二分图，整幅图都不算二分图
+        for (int v = 0; v < n; v++) {
+            if (!visited[v]) {
+                traverse(graph, v);
+            }
+        }
+        return isParti;
+    }
+    // DFS 遍历框架
+    void traverse(int[][] graph, int v) {
+        // 如果已经确定不是二分图了，就不用浪费时间再递归遍历了
+        if (!isParti) return;
+
+        visited[v] = true;
+        for (int w : graph[v]) {
+            if (!visited[w]) {
+                // 相邻节点 w 没有被访问过
+                // 那么应该给节点 w 涂上和节点 v 不同的颜色
+                color[w] = !color[v];
+                // 继续遍历 w
+                traverse(graph, w);
+            } else {
+                // 相邻节点 w 已经被访问过
+                // 根据 v 和 w 的颜色判断是否是二分图
+                if (color[w] == color[v]) {
+                    // 若相同，则此图不是二分图
+                    isParti = false;
+                    return;
+                }
+            }
+        }
+    }
+
 }
 
