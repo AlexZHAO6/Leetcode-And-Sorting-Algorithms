@@ -1245,5 +1245,235 @@ class GraphAlgorithms_ChapterOne{
         }
     }
 
+    public int networkDelayTime(int[][] times, int n, int k) {
+        // 节点编号是从 1 开始的，所以要一个大小为 n + 1 的邻接表
+        List<int[]>[] graph = new LinkedList[n + 1];
+        for (int i = 1; i <= n; i++) {
+            graph[i] = new LinkedList<>();
+        }
+        // 构造图
+        for (int[] edge : times) {
+            int from = edge[0];
+            int to = edge[1];
+            int weight = edge[2];
+            // from -> List<(to, weight)>
+            // 邻接表存储图结构，同时存储权重信息
+            graph[from].add(new int[]{to, weight});
+        }
+        // 启动 dijkstra 算法计算以节点 k 为起点到其他节点的最短路径
+        Dijkstra dijkstra = new Dijkstra();
+        int[] distTo = dijkstra.dijkstra(k, graph);
+
+        // 找到最长的那一条最短路径
+        int res = 0;
+        for (int i = 1; i < distTo.length; i++) {
+            if (distTo[i] == Integer.MAX_VALUE) {
+                // 有节点不可达，返回 -1
+                return -1;
+            }
+            res = Math.max(res, distTo[i]);
+        }
+        return res;
+    }
+}
+
+
+//union-find algorithm 查并集算法
+class UF {
+    // 连通分量个数
+    private int count;
+    // 存储每个节点的父节点
+    private int[] parent;
+
+    // n 为图中节点的个数
+    public UF(int n) {
+        this.count = n;
+        parent = new int[n];
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+        }
+    }
+
+    // 将节点 p 和节点 q 连通
+    public void union(int p, int q) {
+        int rootP = find(p);
+        int rootQ = find(q);
+
+        if (rootP == rootQ)
+            return;
+
+        parent[rootQ] = rootP;
+        // 两个连通分量合并成一个连通分量
+        count--;
+    }
+
+    // 判断节点 p 和节点 q 是否连通
+    public boolean connected(int p, int q) {
+        int rootP = find(p);
+        int rootQ = find(q);
+        return rootP == rootQ;
+    }
+
+    //实现了路径压缩 把 x 到根节点之间的所有节点直接接到根节点下面
+    //really smart recursion!!
+    public int find(int x) {
+        if (parent[x] != x) {
+            parent[x] = find(parent[x]);
+        }
+        return parent[x];
+    }
+
+    // 返回图中的连通分量个数
+    public int count() {
+        return count;
+    }
+}
+
+// 树就是「无环连通图」。
+// 什么是图的「生成树」呢，
+// 其实按字面意思也好理解，就是在图中找一棵包含图中的所有节点的树。专业点说，生成树是含有图中所有顶点的「无环连通子图」。
+class Kruskal{
+    // Kruskal算法基于UF算法 利用贪心法求出最小生成树
+    //
+    // 将所有边按照权重从小到大排序，从权重最小的边开始遍历，
+    // 如果这条边和 mst 中的其它边不会形成环，则这条边是最小生成树的一部分，将它加入 mst 集合；
+    // 否则，这条边不是最小生成树的一部分，不要把它加入 mst 集合。
+    //
+    // 这样，最后 mst 集合中的边就形成了最小生成树
+    public int minCostConnectPoints(int[][] points) {
+        int n = points.length;
+        // 生成所有边及权重
+        List<int[]> edges = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int xi = points[i][0], yi = points[i][1];
+                int xj = points[j][0], yj = points[j][1];
+                // 用坐标点在 points 中的索引表示坐标点
+                edges.add(new int[] {
+                        i, j, Math.abs(xi - xj) + Math.abs(yi - yj)
+                });
+            }
+        }
+        // 将边按照权重从小到大排序
+        Collections.sort(edges, (a, b) -> {
+            return a[2] - b[2];
+        });
+        // 执行 Kruskal 算法
+        int mst = 0;
+        UF uf = new UF(n);
+        for (int[] edge : edges) {
+            int u = edge[0];
+            int v = edge[1];
+            int weight = edge[2];
+            // 若这条边会产生环，则不能加入 mst
+            // 对于添加的这条边，如果该边的两个节点本来就在同一连通分量里，那么添加这条边会产生环；反之，如果该边的两个节点不在同一连通分量里，则添加这条边不会产生环。
+            if (uf.connected(u, v)) {
+                continue;
+            }
+            // 若这条边不会产生环，则属于最小生成树
+            mst += weight;
+            uf.union(u, v);
+        }
+        return mst;
+    }
+}
+
+class Dijkstra{
+    class State {
+        // 图节点的 id
+        int id;
+        // 从 start 节点到当前节点的距离
+        int distFromStart;
+
+        State(int id, int distFromStart) {
+            this.id = id;
+            this.distFromStart = distFromStart;
+        }
+    }
+
+    // 输入一个起点 start，计算从 start 到其他节点的最短距离
+    // 本实现的 Dijkstra 算法复杂度并不是理想情况下的 O(ElogV)，而是 O(ElogE) E: edge 边的条数
+    int[] dijkstra(int start, List<int[]>[] graph) {
+        // 定义：distTo[i] 的值就是起点 start 到达节点 i 的最短路径权重
+        int[] distTo = new int[graph.length];
+        Arrays.fill(distTo, Integer.MAX_VALUE);
+        // base case，start 到 start 的最短距离就是 0
+        distTo[start] = 0;
+
+        // 优先级队列，distFromStart 较小的排在前面
+        Queue<State> pq = new PriorityQueue<>((a, b) -> {
+            return a.distFromStart - b.distFromStart;
+        });
+        // 从起点 start 开始进行 BFS
+        pq.offer(new State(start, 0));
+
+        while (!pq.isEmpty()) {
+            State curState = pq.poll();
+            int curNodeID = curState.id;
+            int curDistFromStart = curState.distFromStart;
+
+            if (curDistFromStart > distTo[curNodeID]) {
+                continue;
+            }
+
+            // 将 curNode 的相邻节点装入队列
+            for (int[] neighbor : graph[curNodeID]) {
+                int nextNodeID = neighbor[0];
+                int distToNextNode = distTo[curNodeID] + neighbor[1];
+                // 更新 dp table
+                if (distTo[nextNodeID] > distToNextNode) {
+                    distTo[nextNodeID] = distToNextNode;
+                    pq.offer(new State(nextNodeID, distToNextNode));
+                }
+            }
+        }
+        return distTo;
+    }
+
+    int dijkstra(int start, int end, List<int[]>[] graph) {
+
+        // 定义：distTo[i] 的值就是起点 start 到达节点 i 的最短路径权重
+        int[] distTo = new int[graph.length];
+        Arrays.fill(distTo, Integer.MAX_VALUE);
+        // base case，start 到 start 的最短距离就是 0
+        distTo[start] = 0;
+
+        // 优先级队列，distFromStart 较小的排在前面
+        Queue<State> pq = new PriorityQueue<>((a, b) -> {
+            return a.distFromStart - b.distFromStart;
+        });
+        // 从起点 start 开始进行 BFS
+        pq.offer(new State(start, 0));
+
+        while (!pq.isEmpty()) {
+            State curState = pq.poll();
+            int curNodeID = curState.id;
+            int curDistFromStart = curState.distFromStart;
+
+            // 在这里加一个判断就行了，其他代码不用改
+            if (curNodeID == end) {
+                return curDistFromStart;
+            }
+
+            if (curDistFromStart > distTo[curNodeID]) {
+                continue;
+            }
+
+
+            // 将 curNode 的相邻节点装入队列
+            for (int[] neighbor : graph[curNodeID]) {
+                int nextNodeID = neighbor[0];
+                int distToNextNode = distTo[curNodeID] + neighbor[1];
+                // 更新 dp table
+                if (distTo[nextNodeID] > distToNextNode) {
+                    distTo[nextNodeID] = distToNextNode;
+                    pq.offer(new State(nextNodeID, distToNextNode));
+                }
+            }
+        }
+
+        // 如果运行到这里，说明从 start 无法走到 end
+        return Integer.MAX_VALUE;
+    }
 }
 
