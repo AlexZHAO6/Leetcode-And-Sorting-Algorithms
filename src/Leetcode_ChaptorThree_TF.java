@@ -7,6 +7,10 @@ public class Leetcode_ChaptorThree_TF {
 
 class BackTrackAlgorithm{
     boolean solveSudoku = false;
+    // 回溯过程中的路径
+    StringBuilder track = new StringBuilder();
+    // 记录所有合法的括号组合
+    List<String> res = new ArrayList<>();
     public int numIslands(char[][] grid) {
         int res = 0;
         int m = grid.length, n = grid[0].length;
@@ -234,6 +238,105 @@ class BackTrackAlgorithm{
                 return false;
         }
         return true;
+    }
+
+    //O(n) : 4^n / sqrt(n)，
+    //「卡特兰数」相关的知识了解一下这个复杂度是怎么算的。
+    public List<String> generateParenthesis(int n) {
+        if (n == 0) return res;
+        // 可用的左括号和右括号数量初始化为 n
+        List<Character> characters = new ArrayList<>();
+        characters.add('(');
+        characters.add(')');
+        backtrack(n, n, characters);
+
+        return res;
+    }
+    // 可用的左括号数量为 left 个，可用的右括号数量为 right 个
+    private void backtrack(int left, int right, List<Character> choices) {
+        // 若左括号剩下的多，说明不合法
+        if (right < left) return;
+        // 数量小于 0 肯定是不合法的
+        if (left < 0 || right < 0) return;
+        // 当所有括号都恰好用完时，得到一个合法的括号组合
+        if (left == 0 && right == 0) {
+            res.add(track.toString());
+            return;
+        }
+
+        for(Character c:choices){
+            //做选择
+            track.append(c);
+
+            if(c.equals('(')){
+                backtrack(left - 1, right,choices);
+            }
+            else {
+                backtrack(left,  right - 1,choices);
+            }
+
+            // 撤消选择
+            track.deleteCharAt(track.length() - 1);
+
+        }
+    }
+
+    //O(n) :  O(k*2^n) -- 以桶的视角的复杂度
+    //O(n) : O(k^n) -- 若以球的视角复杂度为此 下面实现的是以桶的视角backtrack 复杂度更低
+    // 通俗来说，我们应该尽量「少量多次」，就是说宁可多做几次选择（乘法关系），也不要给太大的选择空间（指数关系）；
+    // 做 n 次「k 选一」仅重复一次（O(k^n)），比 n 次「二选一」重复 k 次（O(k*2^n)）效率低很多。
+    public boolean canPartitionKSubsets(int[] nums, int k) {
+        // 排除一些基本情况
+        if (k > nums.length) return false;
+        int sum = 0;
+        for (int v : nums) sum += v;
+        if (sum % k != 0) return false;
+
+        boolean[] used = new boolean[nums.length];
+        int target = sum / k;
+
+        // k 号桶初始什么都没装，从 nums[0] 开始做选择
+        return backtrack(k, 0, nums, 0, used, target);
+    }
+    boolean backtrack(int k, int bucket,
+                      int[] nums, int start, boolean[] used, int target) {
+        // base case
+        if (k == 0) {
+            // 所有桶都被装满了，而且 nums 一定全部用完了
+            // 因为 target == sum / k
+            return true;
+        }
+        if (bucket == target) {
+
+            // 装满了当前桶，递归穷举下一个桶的选择
+            // 让下一个桶从 nums[0] 开始选数字
+            return backtrack(k - 1, 0 ,nums, 0, used, target);
+        }
+
+        // 从 start 开始向后探查有效的 nums[i] 装入当前桶
+        for (int i = start; i < nums.length; i++) {
+            // 剪枝
+            if (used[i]) {
+                // nums[i] 已经被装入别的桶中
+                continue;
+            }
+            if (nums[i] + bucket > target) {
+                // 当前桶装不下 nums[i]
+                continue;
+            }
+            // 做选择，将 nums[i] 装入当前桶中
+            used[i] = true;
+            bucket += nums[i];
+            // 递归穷举下一个数字是否装入当前桶
+            if (backtrack(k, bucket, nums, i + 1, used, target)) {
+                return true;
+            }
+            // 撤销选择
+            used[i] = false;
+            bucket -= nums[i];
+        }
+        // 穷举了所有数字，都无法装满当前桶
+        return false;
     }
 }
 
