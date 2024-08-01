@@ -175,7 +175,80 @@ class DP_BASIC{
     }
 
     public int minimumDeleteSum(String s1, String s2) {
+        int m = s1.length(), n = s2.length();
+        int[][] dp = new int[m + 1][n + 1];
+        for (int i = 1; i <= m; i++) {
+            dp[i][0] = dp[i - 1][0] + s1.codePointAt(i - 1);
+        }
+        for (int j = 1; j <= n; j++) {
+            dp[0][j] = dp[0][j - 1] + s2.codePointAt(j - 1);
+        }
+        for (int i = 1; i <= m; i++) {
+            int code1 = s1.codePointAt(i - 1);
+            for (int j = 1; j <= n; j++) {
+                int code2 = s2.codePointAt(j - 1);
+                if (code1 == code2) {
+                    dp[i][j] = dp[i - 1][j - 1];
+                } else {
+                    dp[i][j] = Math.min(dp[i - 1][j] + code1, dp[i][j - 1] + code2);
+                }
+            }
+        }
+        return dp[m][n];
+    }
 
+    public int longestPalindromeSubseq(String s) {
+        // dp 数组的定义是：在子串 s[i..j] 中，最长回文子序列的长度为 dp[i][j]
+        int n = s.length();
+        // dp 数组全部初始化为 0
+        int[][] dp = new int[n][n];
+        // base case
+        for (int i = 0; i < n; i++) {
+            dp[i][i] = 1;
+        }
+        // 反着遍历保证正确的状态转移
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = i + 1; j < n; j++) {
+                // 状态转移方程
+                if (s.charAt(i) == s.charAt(j)) {
+                    dp[i][j] = dp[i + 1][j - 1] + 2;
+                } else {
+                    dp[i][j] = Math.max(dp[i + 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        // 整个 s 的最长回文子串长度
+        return dp[0][n - 1];
+    }
+
+    public int minInsertions(String s) {
+        //dp定义: 对字符串 s[i..j]，最少需要进行 dp[i][j] 次插入才能变成回文串。
+        int n = s.length();
+        // dp[i][j] 表示把字符串 s[i..j] 变成回文串的最少插入次数
+        // dp 数组全部初始化为 0
+        int[][] dp = new int[n][n];
+
+        // 反着遍历保证正确的状态转移
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = i + 1; j < n; j++) {
+                // 状态转移方程
+                if (s.charAt(i) == s.charAt(j)) {
+                    dp[i][j] = dp[i + 1][j - 1];
+                } else {
+                    // 把 s[i+1..j] 和 s[i..j-1] 变成回文串，选插入次数较少的
+                    // 然后还要再插入一个 s[i] 或 s[j]，使 s[i..j] 配成回文串
+                    dp[i][j] = Math.min(dp[i + 1][j], dp[i][j - 1]) + 1;
+                }
+            }
+        }
+        // 整个 s 的最少插入次数
+        return dp[0][n - 1];
     }
 }
+
+
+
+
+
+
 
