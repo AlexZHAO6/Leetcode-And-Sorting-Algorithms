@@ -244,6 +244,135 @@ class DP_BASIC{
         // 整个 s 的最少插入次数
         return dp[0][n - 1];
     }
+
+    public int minPathSum(int[][] grid) {
+        int m = grid.length;
+        int n = grid[0].length;
+        int[][] dp = new int[m][n];
+
+        // **** base case ****
+        //dp[i][j] 表示从左上角出发到 (i,j) 位置的最小路径和
+        dp[0][0] = grid[0][0];
+
+        for (int i = 1; i < m; i++)
+            dp[i][0] = dp[i - 1][0] + grid[i][0];
+
+        for (int j = 1; j < n; j++)
+            dp[0][j] = dp[0][j - 1] + grid[0][j];
+
+        // 状态转移
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                dp[i][j] = Math.min(
+                        dp[i - 1][j],
+                        dp[i][j - 1]
+                ) + grid[i][j];
+            }
+        }
+
+        return dp[m - 1][n - 1];
+    }
+
+    public int findCheapestPrice(int n, int[][] flights, int src, int dst, int k) {
+        final int INF = 10000 * 101 + 1;
+        //我们用 f[t][i] 表示通过恰好 t 次航班，从出发城市 src 到达城市 i 需要的最小花费
+        //由于我们最多只能中转 k 次，也就是最多搭乘 k+1 次航班
+        int[][] f = new int[k + 2][n];
+        for (int i = 0; i < k + 2; ++i) {
+            Arrays.fill(f[i], INF);
+        }
+        f[0][src] = 0;
+
+        for(int t = 1; t < k +2; t++){
+            for(int[] flight : flights){
+                int tmpdes = flight[1], tmpsrc = flight[0], cost = flight[2];
+                f[t][tmpdes] = Math.min(f[t][tmpdes], f[t-1][tmpsrc] + cost);
+            }
+        }
+
+        int res = INF;
+        for(int i = 0; i <= k + 1; i++){
+            res = Math.min(res, f[i][dst]);
+        }
+
+        return res == INF ? -1 : res;
+    }
+
+    ////-------- 打家劫舍 ----------------
+    public int rob(int[] nums) {
+        if(nums == null || nums.length == 0){
+            return 0;
+        }
+        int n = nums.length;
+        int[] dp = new int[n];
+        if(nums.length == 1) return nums[0];
+        dp[0] = nums[0];
+        dp[1] = Math.max(nums[0],nums[1]);
+
+        for(int i = 2; i < n; i++){
+            dp[i] = Math.max(dp[i-1], dp[i-2] + nums[i]);
+        }
+
+        return dp[n-1];
+    }
+
+    public int rob_2(int[] nums) {
+        int length = nums.length;
+        if (length == 1) {
+            return nums[0];
+        } else if (length == 2) {
+            return Math.max(nums[0], nums[1]);
+        }
+        return Math.max(robRange(nums, 0, length - 2), robRange(nums, 1, length - 1));
+    }
+
+    public int robRange(int[] nums, int start, int end) {
+        int n = end - start + 1;
+        int[] dp = new int[n];
+        if(nums.length == 1) return nums[start];
+        dp[0] = nums[start];
+        dp[1] = Math.max(nums[start],nums[start+1]);
+
+        for(int i = 2; i < n; i++){
+            dp[i] = Math.max(dp[i-1], dp[i-2] + nums[i+start]);
+        }
+
+        return dp[n-1];
+    }
+
+
+    //-------- 股票买卖 ----------------
+    //dp[i][k][0 or 1]
+    //0 <= i <= n - 1, 1 <= k <= K
+    //n 为天数， k 为交易数的上限，0 和 1 代表是否持有股票。
+    //dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
+    //              max( 今天选择 rest,        今天选择 sell       )
+    //dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
+    //              max( 今天选择 rest,         今天选择 buy         ) -- k-1是因为交易的开始是从buy开始！
+    public int maxProfit(int[] prices) {
+        int n = prices.length;
+        int[][] dp = new int[n][2];
+        dp[0][0] = 0;
+        dp[0][1] = -prices[0];
+        for (int i = 1; i < n; i++) {
+            dp[i][0] = Math.max(dp[i-1][0], dp[i-1][1] + prices[i]);
+            dp[i][1] = Math.max(dp[i-1][1], -prices[i]);
+        }
+        return dp[n - 1][0];
+    }
+
+    public int maxProfit_2(int[] prices) {
+        int n = prices.length;
+        int[][] dp = new int[n][2];
+        dp[0][0] = 0;
+        dp[0][1] = -prices[0];
+        for (int i = 1; i < n; i++) {
+            dp[i][0] = Math.max(dp[i-1][0], dp[i-1][1] + prices[i]);
+            dp[i][1] = Math.max(dp[i-1][1], dp[i-1][0] - prices[i]);
+        }
+        return dp[n - 1][0];
+    }
+
 }
 
 
