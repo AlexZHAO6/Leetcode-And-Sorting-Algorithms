@@ -245,6 +245,59 @@ class DP_BASIC{
         return dp[0][n - 1];
     }
 
+    public boolean canPartition(int[] nums) {
+        int sum = 0;
+        for (int num : nums) sum += num;
+        // 和为奇数时，不可能划分成两个和相等的集合
+        if (sum % 2 != 0) return false;
+        int n = nums.length;
+        sum = sum / 2;
+        //dp[i][j] = x 表示，对于前 i 个物品（i 从 1 开始计数），当前背包的容量为 j 时，若 x 为 true，则说明可以恰好将背包装满，若 x 为 false，则说明不能恰好将背包装满。
+        boolean[][] dp = new boolean[n + 1][sum + 1];
+        // base case
+        for (int i = 0; i <= n; i++)
+            dp[i][0] = true;
+
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= sum; j++) {
+                if (j - nums[i - 1] < 0) {
+                    // 背包容量不足，不能装入第 i 个物品
+                    dp[i][j] = dp[i - 1][j];
+                } else {
+                    // 装入或不装入背包
+                    dp[i][j] = dp[i - 1][j] || dp[i - 1][j - nums[i - 1]];
+                }
+            }
+        }
+        return dp[n][sum];
+    }
+
+    public int change(int amount, int[] coins) {
+        int n = coins.length;
+        //dp[i][j] 的定义如下：
+        //若只使用前 i 个物品（可以重复使用），当背包容量为 j 时，有 dp[i][j] 种方法可以装满背包。
+        int[][] dp = new int[n+1][amount+1];
+        for(int i = 1; i <= n; i++){
+            dp[i][0] = 1;
+        }
+
+        for(int i = 1; i <= n; i++){
+            for(int j = 1; j <= amount; j++){
+                if (j - coins[i - 1] < 0) {
+                    // 背包容量不足，不能装入第 i 个物品
+                    dp[i][j] = dp[i - 1][j];
+                }
+                else {
+                    dp[i][j] = dp[i-1][j] + dp[i][j-coins[i-1]];
+                }
+
+            }
+        }
+
+        return dp[n][amount];
+    }
+
+
     public int minPathSum(int[][] grid) {
         int m = grid.length;
         int n = grid[0].length;
