@@ -445,6 +445,122 @@ class DP_BASIC{
         return dp[n - 1][0];
     }
 
+    public int maxProfit_4(int[] prices, int fee) {
+        int n = prices.length;
+        int[][] dp = new int[n][2];
+        dp[0][0] = 0;
+        dp[0][1] = -prices[0] - fee;
+        for (int i = 1; i < n; i++) {
+            dp[i][0] = Math.max(dp[i-1][0], dp[i-1][1] + prices[i]);
+            //买股票要加手续费
+            dp[i][1] = Math.max(dp[i-1][1], dp[i-1][0] - prices[i] - fee);
+        }
+        return dp[n - 1][0];
+    }
+
+    //允许两次交易 dp数组引入K
+    public int maxProfit_5(int[] prices) {
+        int max_k = 2, n = prices.length;
+        int[][][] dp = new int[n][max_k + 1][2];
+
+        for(int i = 1; i <= max_k; i++){
+            dp[0][i][0] = 0;
+            dp[0][i][1] = -prices[0];
+        }
+        for (int i = 1; i < n; i++) {
+            for (int k = max_k; k >= 1; k--) {
+                dp[i][k][0] = Math.max(dp[i-1][k][0], dp[i-1][k][1] + prices[i]);
+                dp[i][k][1] = Math.max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i]);
+            }
+        }
+        // 穷举了 n × max_k × 2 个状态，正确。
+        return dp[n - 1][max_k][0];
+    }
+
+    public int maxProfit_final(int k, int[] prices) {
+        int max_k = k, n = prices.length;
+        int[][][] dp = new int[n][max_k + 1][2];
+
+        for(int i = 1; i <= max_k; i++){
+            dp[0][i][0] = 0;
+            dp[0][i][1] = -prices[0];
+        }
+        for (int i = 1; i < n; i++) {
+            for (int k_this = max_k; k_this >= 1; k_this--) {
+                dp[i][k_this][0] = Math.max(dp[i-1][k_this][0], dp[i-1][k_this][1] + prices[i]);
+                dp[i][k_this][1] = Math.max(dp[i-1][k_this][1], dp[i-1][k_this-1][0] - prices[i]);
+            }
+        }
+        // 穷举了 n × max_k × 2 个状态，正确。
+        return dp[n - 1][max_k][0];
+    }
+
+
+    public int minMeetingRooms(int[][] meetings) {
+        int n = meetings.length;
+        int[] begin = new int[n];
+        int[] end = new int[n];
+        for(int i = 0; i < n; i++) {
+            begin[i] = meetings[i][0];
+            end[i] = meetings[i][1];
+        }
+        Arrays.sort(begin);
+        Arrays.sort(end);
+
+        // 扫描过程中的计数器
+        int count = 0;
+        // 双指针技巧
+        int res = 0, i = 0, j = 0;
+        while (i < n && j < n) {
+
+            if (begin[i] < end[j]) {
+                // 扫描到一个红点
+                count++;
+                i++;
+            } else {
+                // 扫描到一个绿点
+                count--;
+                j++;
+            }
+            // 记录扫描过程中的最大值
+            res = Math.max(res, count);
+        }
+
+        return res;
+    }
+
+    //贪心
+    public boolean canJump(int[] nums) {
+        int n = nums.length;
+        int farthest = 0;
+        for (int i = 0; i < n - 1; i++) {
+            // 不断计算能跳到的最远距离
+            farthest = Math.max(farthest, i + nums[i]);
+            // 可能碰到了 0，卡住跳不动了
+            if (farthest <= i) {
+                return false;
+            }
+        }
+        return farthest >= n - 1;
+    }
+
+    //贪心
+    public int jump(int[] nums) {
+        int n = nums.length;
+        int jumps = 0;
+        int forcast = 0, end = 0;
+        //i 和 end 标记了可以选择的跳跃步数，farthest 标记了所有选择 [i..end] 中能够跳到的最远距离，jumps 记录了跳跃次数。
+        for(int i = 0; i < n - 1 ; i++){
+            forcast = Math.max(forcast, nums[i] + i);
+            if(i == end){
+                jumps++;
+                end = forcast;
+            }
+        }
+
+        return jumps;
+    }
+
 }
 
 
