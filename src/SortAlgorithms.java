@@ -3,9 +3,10 @@ import java.util.List;
 public class SortAlgorithms {
     public static void main(String[] args){
         System.out.println("test");
-        int[] test = {2,1,3};
+        int[] test = {3,2,1,5};
         SortAlgorithms_real testa = new SortAlgorithms_real();
         testa.quickSortHelp(test);
+        testa.insertSort(test);
 
         for(int i = 0; i < test.length; i++){
             System.out.println(test[i]);
